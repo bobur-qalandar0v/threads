@@ -1,0 +1,77 @@
+.menu {
+  &__wrap {
+    background-color: rgb(10, 10, 10);
+    width: 80px;
+    height: 100%;
+  }
+
+  &__items {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    height: 100%;
+  }
+
+  &__top {
+    width: 100%;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+
+    .center__btns {
+      padding: 8px 16px;
+      border-radius: 12px;
+    }
+
+    .plus__btn {
+      background-color: #ffffff14;
+    }
+
+    .plus__icon,
+    .attach__icon,
+    .more__icon {
+      &:hover {
+        color: #fff;
+      }
+    }
+
+    .hover {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      width: 62px;
+      height: 50px;
+
+      &:hover {
+        background-color: #ffffff14;
+      }
+    }
+  }
+
+  &__bottom {
+    height: 18%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+
+    .attach__icon,
+    .more__icon {
+      transition: all 0.2s ease-in-out;
+      &:hover {
+        color: #fff;
+      }
+    }
+  }
+}

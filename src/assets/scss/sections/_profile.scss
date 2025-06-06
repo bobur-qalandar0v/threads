@@ -1,0 +1,25 @@
+.profile {
+    width: 640px;
+    height: 100vh;
+  
+    &__header {
+      height: 10%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+  
+      .title{
+          font-weight: 500;
+      }
+    }
+  
+    &__main {
+      height: 90%;
+      border: 1px solid rgba(243, 245, 247, 0.15);
+      background-color: rgb(24, 24, 24);
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+    }
+  }
+  

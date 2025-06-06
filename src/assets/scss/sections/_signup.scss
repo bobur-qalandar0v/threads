@@ -1,0 +1,236 @@
+.signup {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-self: center;
+  gap: 14px;
+  //   padding-bottom: 24px;
+  //   padding-top: 32px;
+  overflow-y: auto;
+  background-color: #171717;
+
+  &__wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .card {
+    background-image: linear-gradient(163deg, #00ff75 0%, #3700ff 100%);
+    border-radius: 22px;
+    transition: all 0.3s;
+    width: 370px;
+    margin-top: 24px;
+  }
+
+  .card2 {
+    border-radius: 0;
+    transition: all 0.2s;
+
+    &:hover {
+      transform: scale(0.98);
+      border-radius: 20px;
+    }
+  }
+
+  #heading {
+    text-align: center;
+    padding: 20px;
+    color: rgb(255, 255, 255);
+    font-size: 24px;
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .form__item {
+    display: flex;
+    flex-direction: column;
+    padding-left: 2em;
+    padding-right: 2em;
+    padding-bottom: 0.4em;
+    background-color: #171717;
+    border-radius: 20px;
+    transition: 0.4s ease-in-out;
+    box-shadow: 0px 0px 30px 1px rgba(166, 214, 189, 0.3);
+  }
+
+  .field {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    height: 56px;
+    border-radius: 25px;
+    border: none;
+    outline: none;
+    background-color: #171717;
+    box-shadow: inset 2px 5px 10px rgb(5, 5, 5);
+  }
+
+  .icons {
+    position: absolute;
+    left: 10px;
+    top: 18px;
+  }
+
+  .email__icon {
+    top: 20px;
+  }
+
+  .username__icon {
+    top: 17px;
+  }
+
+  .input-field {
+    position: absolute;
+    top: 0;
+    left: 28px;
+    width: 280px;
+    height: 56px;
+    font-size: 18px;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: white;
+    border-radius: 25px;
+
+    &::placeholder {
+      color: white;
+    }
+
+    &:hover {
+      background: transparent;
+      border-color: transparent;
+    }
+
+    &:focus {
+      background-color: transparent;
+      border: none;
+      border-color: transparent;
+      box-shadow: none;
+    }
+  }
+
+  .ant-input:-webkit-autofill,
+  .ant-input:-webkit-autofill:hover,
+  .ant-input:-webkit-autofill:focus,
+  .ant-input:-webkit-autofill:active {
+    -webkit-box-shadow: none !important;
+    -webkit-text-fill-color: white !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  .ant-input {
+    &::placeholder {
+      color: white;
+      font-size: 17px;
+      opacity: 0.5;
+    }
+  }
+
+  .ant-input-affix-wrapper .anticon.ant-input-password-icon {
+    color: white;
+    font-size: 16px;
+
+    &:hover {
+      color: white;
+    }
+  }
+
+  .ant-input-status-error:not(.ant-input-disabled) {
+    background: transparent !important;
+    border-width: 0px !important;
+    border-style: none !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .ant-input-outlined:focus-within {
+    border-color: transparent;
+    box-shadow: none;
+    background-color: transparent;
+  }
+
+  .ant-message-notice-content {
+    background-color: #1f1f1f !important;
+    color: #fff !important;
+    box-shadow: 0 0 8px #00000050;
+    border: 1px solid #333;
+    font-size: 18px;
+  }
+  .ant-message-notice-content .anticon {
+    color: #ffcc00;
+  }
+
+  .button1 {
+    margin-top: 10px;
+    padding: 20px 12px;
+    border-radius: 10px;
+    width: 100%;
+    font-size: 17px;
+    transition: 0.4s ease-in-out;
+    background-color: #252525;
+    color: white;
+    border: none;
+
+    &:hover {
+      background-color: #252525 !important;
+      color: white !important;
+    }
+  }
+
+  .or {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+
+    .line {
+      display: flex;
+      align-items: center;
+      height: 1px;
+      width: 20px;
+      background-color: rgba(243, 245, 247, 0.452);
+    }
+
+    .content {
+      color: rgba(243, 245, 247, 0.452);
+      font-size: 14px;
+    }
+  }
+
+  .request {
+    display: flex;
+    justify-content: space-evenly;
+    margin-top: 10px;
+
+    > p {
+      color: rgba(243, 245, 247, 0.452);
+      font-size: 16px;
+    }
+
+    > button {
+      color: rgba(218, 239, 227, 0.761);
+      //   letter-spacing: 1px;
+      font-size: 18px;
+    }
+  }
+
+  .footer {
+    padding: 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    gap: 24px;
+    color: rgb(119, 119, 119);
+  }
+}
