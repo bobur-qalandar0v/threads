@@ -85,25 +85,58 @@ function ModalComponent() {
   // }
   // };
 
+  // const handlePublish = async () => {
+  //   if (isPublishDisabled) {
+  //     return;
+  //   }
+
+  //   // faqat bitta image va bitta video olish (sizning API structure bo‘yicha)
+  //   const imageItem = selectedFiles.find((item) => item.type === "image");
+  //   const videoItem = selectedFiles.find((item) => item.type === "video");
+
+  //   const imageObj = imageItem
+  //     ? {
+  //         url: "https://via.placeholder.com/300", // vaqtincha static URL (Mocky uchun)
+  //       }
+  //     : { url: "" };
+
+  //   const videoObj = videoItem
+  //     ? {
+  //         url: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4", // vaqtincha static URL (Mocky uchun)
+  //       }
+  //     : { url: "" };
+
+  //   const payload = {
+  //     text: value,
+  //     images: imageObj,
+  //     videos: videoObj,
+  //   };
+
+  //   try {
+  //     const res = await API.post(urls.user_post.post, payload);
+  //     console.log("Post:", res.data);
+
+  //     message.success("Post muvaffaqiyatli yuborildi");
+
+  //     setValue("");
+  //     setSelectedFiles([]);
+  //     handleCancel();
+  //   } catch (error) {
+  //     console.error("Xatolik", error);
+  //   }
+  // };
+
   const handlePublish = async () => {
     if (isPublishDisabled) {
       return;
     }
 
-    // faqat bitta image va bitta video olish (sizning API structure bo‘yicha)
-    const imageItem = selectedFiles.find((item) => item.type === "image");
-    const videoItem = selectedFiles.find((item) => item.type === "video");
-
-    const imageObj = imageItem
-      ? {
-          url: "https://via.placeholder.com/300", // vaqtincha static URL (Mocky uchun)
-        }
+    const imageObj = selectedFiles.find((item) => item.type === "image")
+      ? { url: selectedFiles.find((item) => item.type === "image").url }
       : { url: "" };
 
-    const videoObj = videoItem
-      ? {
-          url: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4", // vaqtincha static URL (Mocky uchun)
-        }
+    const videoObj = selectedFiles.find((item) => item.type === "video")
+      ? { url: selectedFiles.find((item) => item.type === "video").url }
       : { url: "" };
 
     const payload = {
