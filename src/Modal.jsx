@@ -11,7 +11,7 @@ import { message } from "antd";
 function ModalComponent() {
   const { openModal, handleCancel, loading } = useContext(ModalContext);
   const [value, setValue] = useState("");
-  const [selectedFiles, setSelectedFiles] = useState([]); // 🔹 Fayllar ro‘yxati
+  const [selectedFiles, setSelectedFiles] = useState([]); // Fayllar ro‘yxati
 
   const textareaRef = useRef(null);
 
@@ -182,7 +182,7 @@ function ModalComponent() {
                 </button>
               </div>
             </div>
-            <div className="line"></div>
+            <div className="modal__line"></div>
             <div className="modal__main">
               <div className="userinfo">
                 <img
@@ -269,7 +269,7 @@ function ModalComponent() {
                             height: `${
                               selectedFiles.length === 1 &&
                               selectedFiles[0].type === "video"
-                                ? "400px"
+                                ? "380px"
                                 : "300px"
                             }`,
                             borderRadius: "8px",

@@ -4,23 +4,26 @@
   left: 0;
   width: 100%;
   height: 100%;
+  padding-top: 30px;
   overflow: auto;
   background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
-  justify-content: space-around;
+  justify-content: center;
   z-index: 1000;
   opacity: 0;
   animation: fadeIn 0.3s ease forwards;
 }
 
 .modal__content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   border: 1px solid rgba(243, 245, 247, 0.15);
   background-color: rgb(24, 24, 24);
   padding: 20px;
   border-radius: 12px;
   max-width: 610px;
-  // height: 270px;
   height: auto;
   width: 90%;
   position: relative;
@@ -35,7 +38,7 @@
   justify-content: space-between;
 }
 
-.line {
+.modal__line {
   position: absolute;
   top: 65px;
   left: 0;
