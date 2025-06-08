@@ -17,6 +17,40 @@ function ModalComponent() {
 
   const isPublishDisabled = value.trim() === "" && selectedFiles.length === 0;
 
+  const handlePublish = async () => {
+    const imageObj = selectedFiles
+      .filter((file) => file.type === "image")
+      .map((file, index) => ({ id: index + 1, url: file.url }));
+
+    const videoObj = selectedFiles
+      .filter((file) => file.type === "video")
+      .map((file, index) => ({ id: index + 1, url: file.url }));
+
+    const payload = {
+      text: value,
+      images: imageObj,
+      videos: videoObj,
+      actions: [
+        {
+          likeCount: "0",
+          comentCount: "0",
+          shareCount: "0",
+        },
+      ],
+    };
+
+    try {
+      const res = await API.post(urls.user_post.post, payload);
+      console.log("Post:", res.data);
+      message.success("Post muvaffaqiyatli yuborildi");
+      setValue("");
+      setSelectedFiles([]);
+      handleCancel();
+    } catch (error) {
+      console.error("Xatolik", error);
+    }
+  };
+
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
@@ -53,57 +87,16 @@ function ModalComponent() {
   if (!openModal) return null;
 
   // const handlePublish = async () => {
-  // if (isPublishDisabled) {
-  //   return;
-  // }
-
-  // const images = selectedFiles
-  //   .filter((item) => item.type === "image")
-  //   .map((item) => item.url); // Bu faqat local preview URL — productionda bu bo‘lmaydi
-
-  // const videos = selectedFiles
-  //   .filter((item) => item.type === "video")
-  //   .map((item) => item.url);
-
-  // const payload = {
-  //   text: value,
-  //   images,
-  //   videos,
-  // };
-
-  // try {
-  //   const res = await API.post(urls.user_post.post, payload);
-  //   console.log("Post:", res.data);
-
-  //   message.success("Post muvaffaqiyatli yuborildi");
-
-  //   setValue("");
-  //   setSelectedFiles([]);
-  //   handleCancel();
-  // } catch (error) {
-  //   console.error("Xatolik", error);
-  // }
-  // };
-
-  // const handlePublish = async () => {
   //   if (isPublishDisabled) {
   //     return;
   //   }
 
-  //   // faqat bitta image va bitta video olish (sizning API structure bo‘yicha)
-  //   const imageItem = selectedFiles.find((item) => item.type === "image");
-  //   const videoItem = selectedFiles.find((item) => item.type === "video");
-
-  //   const imageObj = imageItem
-  //     ? {
-  //         url: "https://via.placeholder.com/300", // vaqtincha static URL (Mocky uchun)
-  //       }
+  //   const imageObj = selectedFiles.find((item) => item.type === "image")
+  //     ? { url: selectedFiles.find((item) => item.type === "image").url }
   //     : { url: "" };
 
-  //   const videoObj = videoItem
-  //     ? {
-  //         url: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4", // vaqtincha static URL (Mocky uchun)
-  //       }
+  //   const videoObj = selectedFiles.find((item) => item.type === "video")
+  //     ? { url: selectedFiles.find((item) => item.type === "video").url }
   //     : { url: "" };
 
   //   const payload = {
@@ -125,39 +118,6 @@ function ModalComponent() {
   //     console.error("Xatolik", error);
   //   }
   // };
-
-  const handlePublish = async () => {
-    if (isPublishDisabled) {
-      return;
-    }
-
-    const imageObj = selectedFiles.find((item) => item.type === "image")
-      ? { url: selectedFiles.find((item) => item.type === "image").url }
-      : { url: "" };
-
-    const videoObj = selectedFiles.find((item) => item.type === "video")
-      ? { url: selectedFiles.find((item) => item.type === "video").url }
-      : { url: "" };
-
-    const payload = {
-      text: value,
-      images: imageObj,
-      videos: videoObj,
-    };
-
-    try {
-      const res = await API.post(urls.user_post.post, payload);
-      console.log("Post:", res.data);
-
-      message.success("Post muvaffaqiyatli yuborildi");
-
-      setValue("");
-      setSelectedFiles([]);
-      handleCancel();
-    } catch (error) {
-      console.error("Xatolik", error);
-    }
-  };
 
   return (
     <div className="modal__overlay" onClick={handleCancel}>
@@ -255,7 +215,7 @@ function ModalComponent() {
                         className="media__item-video"
                         style={{
                           position: "relative",
-                          flexShrink: 0 /* important! */,
+                          flexShrink: 0,
                         }}
                       >
                         <video
