@@ -17,37 +17,108 @@ function ModalComponent() {
 
   const isPublishDisabled = value.trim() === "" && selectedFiles.length === 0;
 
+  // const handlePublish = async () => {
+  //   if (isPublishDisabled) {
+  //     return;
+  //   }
+
+  //   try {
+  //     // Avval selectedFiles dan haqiqiy URL olish:
+  //     const uploadedImages = [];
+  //     const uploadedVideos = [];
+
+  //     for (const file of selectedFiles) {
+  //       const formData = new FormData();
+  //       formData.append("file", file.file); // original file
+
+  //       const res = await API.post(urls.user_post.post, formData);
+
+  //       const uploadedUrl = res.data.url; // serverdan kelgan haqiqiy URL
+
+  //       if (file.type === "image") {
+  //         uploadedImages.push({ url: uploadedUrl });
+  //       } else if (file.type === "video") {
+  //         uploadedVideos.push({ url: uploadedUrl });
+  //       }
+  //     }
+
+  //     // Endi haqiqiy URL larni POST qilamiz
+  //     const payload = {
+  //       text: value,
+  //       images: uploadedImages,
+  //       videos: uploadedVideos,
+  //       actions: [
+  //         {
+  //           likeCount: "0",
+  //           comentCount: "0",
+  //           shareCount: "0",
+  //         },
+  //       ],
+  //     };
+
+  //     await API.post(urls.user_post.post, payload).then((res) =>
+  //       console.log(res)
+  //     );
+
+  //     handleCancel();
+  //     setSelectedFiles([]); // Fayllarni tozalash
+  //     setValue(""); // Textni tozalash
+  //   } catch (error) {
+  //     console.error("Post yuborishda xatolik:", error);
+  //   }
+  // };
+
   const handlePublish = async () => {
-    const imageObj = selectedFiles
-      .filter((file) => file.type === "image")
-      .map((file, index) => ({ id: index + 1, url: file.url }));
-
-    const videoObj = selectedFiles
-      .filter((file) => file.type === "video")
-      .map((file, index) => ({ id: index + 1, url: file.url }));
-
-    const payload = {
-      text: value,
-      images: imageObj,
-      videos: videoObj,
-      actions: [
-        {
-          likeCount: "0",
-          comentCount: "0",
-          shareCount: "0",
-        },
-      ],
-    };
-
     try {
-      const res = await API.post(urls.user_post.post, payload);
-      console.log("Post:", res.data);
-      message.success("Post muvaffaqiyatli yuborildi");
-      setValue("");
-      setSelectedFiles([]);
+      const uploadedImages = [];
+      const uploadedVideos = [];
+
+      // Fayllarni yuklash
+      for (const file of selectedFiles) {
+        const formData = new FormData();
+        formData.append("image", file.file);
+
+        const res = await fetch(
+          `https://api.imgbb.com/1/upload?key=c6a8b7042c866880c1678234f084e3bb`,
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
+        const data = await res.json();
+
+        if (data.success) {
+          if (file.type === "image") {
+            uploadedImages.push({ url: data.data.url });
+          }
+          // Agar video bo‘lsa o‘z videoni serverga yuklashingiz kerak (video endpoint)
+        }
+      }
+
+      // Post payload
+      const payload = {
+        text: value,
+        images: uploadedImages,
+        videos: uploadedVideos, // agar video upload qilinsa
+        actions: [
+          {
+            likeCount: "0",
+            comentCount: "0",
+            shareCount: "0",
+          },
+        ],
+      };
+
+      // Post yuborish
+      await API.post(urls.user_post.post, payload);
+
+      // UI tozalash
       handleCancel();
+      setSelectedFiles([]);
+      setValue("");
     } catch (error) {
-      console.error("Xatolik", error);
+      console.error("Post yuborishda xatolik:", error);
     }
   };
 
@@ -85,39 +156,6 @@ function ModalComponent() {
   };
 
   if (!openModal) return null;
-
-  // const handlePublish = async () => {
-  //   if (isPublishDisabled) {
-  //     return;
-  //   }
-
-  //   const imageObj = selectedFiles.find((item) => item.type === "image")
-  //     ? { url: selectedFiles.find((item) => item.type === "image").url }
-  //     : { url: "" };
-
-  //   const videoObj = selectedFiles.find((item) => item.type === "video")
-  //     ? { url: selectedFiles.find((item) => item.type === "video").url }
-  //     : { url: "" };
-
-  //   const payload = {
-  //     text: value,
-  //     images: imageObj,
-  //     videos: videoObj,
-  //   };
-
-  //   try {
-  //     const res = await API.post(urls.user_post.post, payload);
-  //     console.log("Post:", res.data);
-
-  //     message.success("Post muvaffaqiyatli yuborildi");
-
-  //     setValue("");
-  //     setSelectedFiles([]);
-  //     handleCancel();
-  //   } catch (error) {
-  //     console.error("Xatolik", error);
-  //   }
-  // };
 
   return (
     <div className="modal__overlay" onClick={handleCancel}>

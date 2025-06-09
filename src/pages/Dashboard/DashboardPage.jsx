@@ -138,7 +138,7 @@ function DashboardPage() {
                               key={i.id}
                               className="image__wrap"
                               style={{
-                                width: "340px",
+                                width: "300px",
                                 height: "330px",
                                 flexShrink: 0,
                               }}
