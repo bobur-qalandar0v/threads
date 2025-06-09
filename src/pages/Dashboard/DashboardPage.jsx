@@ -1,6 +1,4 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { API } from "../../api";
-import { urls } from "../../constants/urls";
 import { ModalContext } from "../../contexts/ModalContext";
 import VolumeMutedIcon from "../../assets/icons/VolumeMutedIcon";
 import VolumeIcon from "../../assets/icons/VolumeIcon";
@@ -12,20 +10,19 @@ import DotsIcon from "../../assets/icons/DotsIcon";
 function DashboardPage() {
   const videoRef = useRef(null);
 
-  const [post, setPost] = useState([]);
-  const [muted, setMuted] = useState([]);
+  const [videoRefs, setVideoRefs] = useState([]);
+  const [mutedVideos, setMutedVideos] = useState([]);
 
-  const { showLoading } = useContext(ModalContext);
+  const { showLoading, post, getPosts } = useContext(ModalContext);
 
-  const getPosts = () => {
-    API.get(urls.user_post.get).then((res) => {
-      setPost(res.data);
-      setMuted(res.data.map(() => true));
-    });
-  };
-
-  const handleMute = (index) => {
-    setMuted((prev) => prev.map((state, i) => (i === index ? !state : state)));
+  const handleMute = (postIndex, videoIndex) => {
+    setMutedVideos((prev) =>
+      prev.map((postMuted, i) =>
+        i === postIndex
+          ? postMuted.map((m, j) => (j === videoIndex ? !m : m))
+          : postMuted
+      )
+    );
   };
 
   const openModal = () => {
@@ -35,6 +32,17 @@ function DashboardPage() {
   useEffect(() => {
     getPosts();
   }, []);
+
+  useEffect(() => {
+    // Har bir post uchun videoRefs va mutedVideos ni yangilash
+    const refs = post.map((item) =>
+      (item.videos || []).map(() => React.createRef())
+    );
+    const muted = post.map((item) => (item.videos || []).map(() => true));
+
+    setVideoRefs(refs);
+    setMutedVideos(muted);
+  }, [post]);
 
   return (
     <div className="dashboard">
@@ -58,7 +66,7 @@ function DashboardPage() {
           </button>
         </div>
         <span className="publish__line"></span>
-        {post.map((item, index) => (
+        {post?.map((item, index) => (
           <div className="posts-list">
             <div className="posts__list-wrap">
               <div className="posts__list-item" key={item.id}>
@@ -83,29 +91,29 @@ function DashboardPage() {
                   <p className="post__text">{item?.text}</p>
 
                   {item?.videos?.length > 0 || item?.images?.length > 0 ? (
-                    <div className="media__wrap" key={item.id}>
+                    <div className="media__wrap">
                       {/* VIDEO */}
-                      {item?.videos?.map((i) => {
+                      {item?.videos?.map((i, videoIndex) => {
                         if (i?.url == "") {
                           return <></>;
                         } else {
                           return (
                             <div
-                              key={i.id}
+                              key={i.id || videoIndex}
                               className="video__wrap"
                               style={{
-                                width: "250px",
-                                height: "330px",
+                                width: "280px",
+                                height: "350px",
                                 position: "relative",
                                 flexShrink: 0,
                               }}
                             >
                               <video
-                                ref={videoRef}
+                                ref={videoRefs[index]?.[videoIndex]}
                                 src={i?.url}
                                 autoPlay
                                 loop
-                                muted={muted[index]}
+                                muted={mutedVideos[index]?.[videoIndex]}
                                 style={{
                                   width: "100%",
                                   height: "100%",
@@ -115,9 +123,9 @@ function DashboardPage() {
                               />
                               <button
                                 className="volume__muted-btn"
-                                onClick={() => handleMute(index)}
+                                onClick={() => handleMute(index, videoIndex)}
                               >
-                                {muted[index] ? (
+                                {mutedVideos[index]?.[videoIndex] ? (
                                   <VolumeMutedIcon />
                                 ) : (
                                   <VolumeIcon />
@@ -139,7 +147,7 @@ function DashboardPage() {
                               className="image__wrap"
                               style={{
                                 width: "300px",
-                                height: "330px",
+                                height: "350px",
                                 flexShrink: 0,
                               }}
                             >

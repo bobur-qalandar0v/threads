@@ -6,7 +6,7 @@ function ProfilePage() {
       <div className="profile__header">
         <h3 className="title">Профиль</h3>
       </div>
-      <div className="profile__main"></div>
+      <div className="profile__main"> </div>
     </div>
   );
 }
