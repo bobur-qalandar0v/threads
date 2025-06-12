@@ -8,22 +8,10 @@ import ShareIcon from "../../assets/icons/ShareIcon";
 import DotsIcon from "../../assets/icons/DotsIcon";
 
 function DashboardPage() {
-  const videoRef = useRef(null);
-
-  const [videoRefs, setVideoRefs] = useState([]);
-  const [mutedVideos, setMutedVideos] = useState([]);
-
+  const videoRefs = useRef([]);
   const { showLoading, post, getPosts } = useContext(ModalContext);
 
-  const handleMute = (postIndex, videoIndex) => {
-    setMutedVideos((prev) =>
-      prev.map((postMuted, i) =>
-        i === postIndex
-          ? postMuted.map((m, j) => (j === videoIndex ? !m : m))
-          : postMuted
-      )
-    );
-  };
+  const [mutedStates, setMutedStates] = useState({});
 
   const openModal = () => {
     showLoading();
@@ -34,14 +22,47 @@ function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    // Har bir post uchun videoRefs va mutedVideos ni yangilash
-    const refs = post.map((item) =>
-      (item.videos || []).map(() => React.createRef())
-    );
-    const muted = post.map((item) => (item.videos || []).map(() => true));
+    const newStates = {};
+    post.forEach((pItem, pIndex) => {
+      pItem?.videos?.forEach((_, vIndex) => {
+        const key = `${pIndex}-${vIndex}`;
+        newStates[key] = true; // Boshida hammasi muted
+      });
+    });
+    setMutedStates(newStates);
+  }, [post]);
 
-    setVideoRefs(refs);
-    setMutedVideos(muted);
+  const handleMute = (postIndex, videoIndex) => {
+    const clickedKey = `${postIndex}-${videoIndex}`;
+    const updatedStates = {};
+
+    Object.keys(mutedStates).forEach((key) => {
+      updatedStates[key] = key === clickedKey ? !mutedStates[key] : true;
+    });
+
+    setMutedStates(updatedStates);
+  };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const video = entry.target;
+          if (entry.isIntersecting) {
+            video.play().catch(() => {});
+          } else {
+            video.pause();
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    videoRefs.current.forEach((video) => {
+      if (video) observer.observe(video);
+    });
+
+    return () => observer.disconnect();
   }, [post]);
 
   return (
@@ -66,14 +87,15 @@ function DashboardPage() {
           </button>
         </div>
         <span className="publish__line"></span>
-        {post?.map((item, index) => (
-          <div className="posts-list">
+
+        {post?.map((item, postIndex) => (
+          <div className="posts-list" key={postIndex}>
             <div className="posts__list-wrap">
-              <div className="posts__list-item" key={item.id}>
+              <div className="posts__list-item">
                 <div className="img__wrap">
                   <img
-                    width={45}
-                    height={45}
+                    width={40}
+                    height={40}
                     style={{ borderRadius: "24px" }}
                     src="/dost.jpg"
                     alt="img"
@@ -88,91 +110,87 @@ function DashboardPage() {
                       </span>
                     </button>
                   </div>
-                  <p className="post__text">{item?.text}</p>
+                  {item?.text && <p className="post__text">{item.text}</p>}
 
-                  {item?.videos?.length > 0 || item?.images?.length > 0 ? (
+                  {(item?.videos?.length > 0 || item?.images?.length > 0) && (
                     <div className="media__wrap">
-                      {/* VIDEO */}
                       {item?.videos?.map((i, videoIndex) => {
-                        if (i?.url == "") {
-                          return <></>;
-                        } else {
-                          return (
-                            <div
-                              key={i.id || videoIndex}
-                              className="video__wrap"
-                              style={{
-                                width: "280px",
-                                height: "350px",
-                                position: "relative",
-                                flexShrink: 0,
+                        if (!i?.url) return null;
+                        const key = `${postIndex}-${videoIndex}`;
+                        const refIndex = postIndex * 1000 + videoIndex;
+
+                        return (
+                          <div
+                            key={i.id || videoIndex}
+                            className="video__wrap"
+                            style={{
+                              width:
+                                item?.videos?.length === 1 ? "350px" : "260px",
+                              height:
+                                item?.videos?.length === 1 ? "430px" : "320px",
+                              position: "relative",
+                              flexShrink: 0,
+                            }}
+                          >
+                            <video
+                              ref={(el) => {
+                                if (el) videoRefs.current[refIndex] = el;
                               }}
+                              src={i.url}
+                              muted={mutedStates[key]}
+                              loop
+                              playsInline
+                              autoPlay
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                                borderRadius: "8px",
+                              }}
+                            />
+                            <button
+                              className="volume__muted-btn"
+                              onClick={() => handleMute(postIndex, videoIndex)}
                             >
-                              <video
-                                ref={videoRefs[index]?.[videoIndex]}
-                                src={i?.url}
-                                autoPlay
-                                loop
-                                muted={mutedVideos[index]?.[videoIndex]}
-                                style={{
-                                  width: "100%",
-                                  height: "100%",
-                                  objectFit: "cover",
-                                  borderRadius: "8px",
-                                }}
-                              />
-                              <button
-                                className="volume__muted-btn"
-                                onClick={() => handleMute(index, videoIndex)}
-                              >
-                                {mutedVideos[index]?.[videoIndex] ? (
-                                  <VolumeMutedIcon />
-                                ) : (
-                                  <VolumeIcon />
-                                )}
-                              </button>
-                            </div>
-                          );
-                        }
+                              {mutedStates[key] ? (
+                                <VolumeMutedIcon />
+                              ) : (
+                                <VolumeIcon />
+                              )}
+                            </button>
+                          </div>
+                        );
                       })}
 
-                      {/* IMAGE */}
-                      {item?.images?.map((i) => {
-                        if (i?.url == "") {
-                          return <></>;
-                        } else {
-                          return (
-                            <div
-                              key={i.id}
-                              className="image__wrap"
+                      {item?.images?.map((i) =>
+                        !i?.url ? null : (
+                          <div
+                            key={i.id}
+                            className="image__wrap"
+                            style={{
+                              width: "300px",
+                              height: "350px",
+                              flexShrink: 0,
+                            }}
+                          >
+                            <img
+                              src={i.url}
+                              alt="image"
                               style={{
-                                width: "300px",
-                                height: "350px",
-                                flexShrink: 0,
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                                borderRadius: "8px",
                               }}
-                            >
-                              <img
-                                src={i?.url}
-                                alt="ovqat"
-                                style={{
-                                  width: "100%",
-                                  height: "100%",
-                                  objectFit: "cover",
-                                  borderRadius: "8px",
-                                }}
-                              />
-                            </div>
-                          );
-                        }
-                      })}
+                            />
+                          </div>
+                        )
+                      )}
                     </div>
-                  ) : (
-                    <></>
                   )}
 
-                  {/* ACTIONS */}
                   {item?.actions?.map((i) => (
-                    <div className="actions">
+                    <div className="actions" key={i.id}>
                       <div className="actions__wrap">
                         <div className="heart__action">
                           <button className="actions__icon">
@@ -180,13 +198,12 @@ function DashboardPage() {
                             <span
                               style={{
                                 color: "#fff",
+                                fontSize: "17px",
                                 display: "flex",
                                 alignItems: "center",
-                                justifyContent: "center",
-                                fontSize: "17px",
                               }}
                             >
-                              {i.likeCount == "0" ? "" : i.likeCount}
+                              {i.likeCount === "0" ? "" : i.likeCount}
                             </span>
                           </button>
                         </div>
@@ -194,7 +211,7 @@ function DashboardPage() {
                           <button className="actions__icon">
                             <CommentIcon />
                             <span style={{ fontSize: "17px" }}>
-                              {i.comentCount == "0" ? "" : i.comentCount}
+                              {i.comentCount === "0" ? "" : i.comentCount}
                             </span>
                           </button>
                         </div>
@@ -202,7 +219,7 @@ function DashboardPage() {
                           <button className="actions__icon">
                             <ShareIcon />
                             <span style={{ fontSize: "17px" }}>
-                              {i.shareCount == "0" ? "" : i.shareCount}
+                              {i.shareCount === "0" ? "" : i.shareCount}
                             </span>
                           </button>
                         </div>

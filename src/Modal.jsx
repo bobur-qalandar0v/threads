@@ -83,153 +83,6 @@ function ModalComponent() {
     }
   };
 
-  // const handlePublish = async () => {
-  //   try {
-  //     setIsPublishing(true);
-
-  //     const uploadedImages = [];
-  //     const uploadedVideos = [];
-
-  //     // Fayllarni yuklash
-  //     for (const file of selectedFiles) {
-  //       if (file.type === "image") {
-  //         const formData = new FormData();
-
-  //         formData.append("image", file.file);
-
-  //         const res = await fetch(
-  //           `https://api.imgbb.com/1/upload?key=c6a8b7042c866880c1678234f084e3bb`,
-  //           {
-  //             method: "POST",
-  //             body: formData,
-  //           }
-  //         );
-
-  //         const data = await res.json();
-
-  //         if (data.success) {
-  //           uploadedImages.push({ url: data.data.url });
-  //         }
-  //       }
-
-  //       if (file.type === "video") {
-  //         const formData = new FormData();
-  //         formData.append("video", file.file);
-
-  //         const res = await fetch("http://localhost:5000/upload-video", {
-  //           method: "POST",
-  //           body: formData,
-  //         });
-
-  //         const data = await res.json();
-  //         console.log(data);
-
-  //         if (data.success) {
-  //           uploadedVideos.push({ url: data.video__url });
-  //         } else {
-  //           console.error("Video upload failed: ", data);
-  //         }
-  //       }
-  //     }
-
-  //     // Post payload
-  //     const payload = {
-  //       text: value,
-  //       images: uploadedImages,
-  //       videos: uploadedVideos, // agar video upload qilinsa
-  //       actions: [
-  //         {
-  //           likeCount: "0",
-  //           comentCount: "0",
-  //           shareCount: "0",
-  //         },
-  //       ],
-  //     };
-
-  //     // Post yuborish
-  //     await API.post(urls.user_post.post, payload);
-
-  //     // UI tozalash
-  //     message.success("Post joylandi...");
-  //     handleCancel();
-  //     setSelectedFiles([]);
-  //     setValue("");
-  //   } catch (error) {
-  //     console.error("Post yuborishda xatolik:", error);
-  //     message.error("Post joylashda xatolik!");
-  //   } finally {
-  //     setIsPublishing(false);
-  //   }
-  // };
-
-  // const handlePublish = async () => {
-  //   try {
-  //     setIsPublishing(true);
-
-  //     const uploadedImages = [];
-  //     const uploadedVideos = [];
-
-  //     for (const file of selectedFiles) {
-  //       const formData = new FormData();
-  //       formData.append("file", file.file); // serverda "file" sifatida qabul qilamiz
-
-  //       if (file.type === "image") {
-  //         // Rasm yuklash (imgbb)
-  //         const res = await fetch(
-  //           "https://api.imgbb.com/1/upload?key=c6a8b7042c866880c1678234f084e3bb",
-  //           {
-  //             method: "POST",
-  //             body: formData,
-  //           }
-  //         );
-
-  //         const data = await res.json();
-
-  //         if (data.success) {
-  //           uploadedImages.push({ url: data.data.url });
-  //         }
-  //       } else if (file.type === "video") {
-  //         // Video yuklash (o‘z backendizga)
-  //         const res = await fetch("http://localhost:5000/upload-video", {
-  //           method: "POST",
-  //           body: formData,
-  //         });
-
-  //         const data = await res.json();
-
-  //         if (data.success) {
-  //           uploadedVideos.push({ url: data.video_url });
-  //         }
-  //       }
-  //     }
-
-  //     const payload = {
-  //       text: value,
-  //       images: uploadedImages,
-  //       videos: uploadedVideos,
-  //       actions: [
-  //         {
-  //           likeCount: "0",
-  //           comentCount: "0",
-  //           shareCount: "0",
-  //         },
-  //       ],
-  //     };
-
-  //     await API.post(urls.user_post.post, payload);
-
-  //     message.success("Post joylandi...");
-  //     handleCancel();
-  //     setSelectedFiles([]);
-  //     setValue("");
-  //   } catch (error) {
-  //     console.error("Post yuborishda xatolik:", error);
-  //     message.error("Xatolik yuz berdi");
-  //   } finally {
-  //     setIsPublishing(false);
-  //   }
-  // };
-
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
@@ -371,12 +224,18 @@ function ModalComponent() {
                           muted
                           style={{
                             objectFit: "cover",
-                            width: "250px",
+
+                            width: `${
+                              selectedFiles.length === 1 &&
+                              selectedFiles[0].type === "video"
+                                ? "350px"
+                                : "280px"
+                            }`,
                             height: `${
                               selectedFiles.length === 1 &&
                               selectedFiles[0].type === "video"
-                                ? "380px"
-                                : "300px"
+                                ? "400px"
+                                : "350px"
                             }`,
                             borderRadius: "8px",
                             cursor: "grab",
