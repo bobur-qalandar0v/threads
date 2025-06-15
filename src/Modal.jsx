@@ -9,7 +9,8 @@ import { urls } from "./constants/urls";
 import { message } from "antd";
 
 function ModalComponent() {
-  const { openModal, handleCancel, loading } = useContext(ModalContext);
+  const { openModal, handleCancel, loading, getPosts } =
+    useContext(ModalContext);
   const [value, setValue] = useState("");
   const [isPublishing, setIsPublishing] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]); // Fayllar ro‘yxati
@@ -59,9 +60,9 @@ function ModalComponent() {
         videos: uploadedVideos,
         actions: [
           {
-            likeCount: "0",
-            comentCount: "0",
-            shareCount: "0",
+            likeCount: 0,
+            comentCount: 0,
+            shareCount: 0,
           },
         ],
       };
@@ -75,9 +76,10 @@ function ModalComponent() {
       handleCancel();
       setSelectedFiles([]);
       setValue("");
+      getPosts();
     } catch (error) {
-      console.error("Post yuborishda xatolik:", error);
-      message.error("Post yuborishda xatolik yuz berdi");
+      console.error("Post joylashda xatolik:", error);
+      message.error("Post joylashda xatolik yuz berdi");
     } finally {
       setIsPublishing(false);
     }
@@ -119,8 +121,11 @@ function ModalComponent() {
   if (!openModal) return null;
 
   return (
-    <div className="modal__overlay" onClick={handleCancel}>
-      <div className="modal__content" onClick={(e) => e.stopPropagation()}>
+    <div className="modal__overlay">
+      <div
+        className="modal__content"
+        // onClick={(e) => e.stopPropagation()}
+      >
         {loading ? (
           <div className="loader__wrap">
             <div className="loader"></div>

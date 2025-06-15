@@ -5,6 +5,7 @@ export const urls = {
   },
   user_post: {
     post: "/user_posts",
+    patch: "/user_posts",
     get: "/user_posts",
   },
 };

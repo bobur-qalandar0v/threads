@@ -13,7 +13,8 @@ export const ModalProvider = ({ children }) => {
 
   const getPosts = () => {
     API.get(urls.user_post.get).then((res) => {
-      setPost(res.data);
+      const sorted = res?.data?.sort((a, b) => b.id - a.id);
+      setPost(sorted);
       setMuted(res.data.map(() => true));
     });
   };
