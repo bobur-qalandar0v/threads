@@ -7,6 +7,7 @@ export const ModalContext = createContext(null);
 export const ModalProvider = ({ children }) => {
   const [openModal, setOpenModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [editModal, setEditModal] = useState(false);
 
   const [post, setPost] = useState([]);
   const [muted, setMuted] = useState(true);
@@ -26,6 +27,15 @@ export const ModalProvider = ({ children }) => {
     setTimeout(() => {
       setLoading(false);
     }, 400);
+  };
+
+  const showEditModal = () => {
+    setEditModal(true);
+    setLoading(true);
+
+    setTimeout(() => {
+      setLoading(false);
+    }, 300);
   };
 
   const handleCancel = () => {
@@ -49,6 +59,9 @@ export const ModalProvider = ({ children }) => {
         post,
         muted,
         setMuted,
+        editModal,
+        setEditModal,
+        showEditModal,
       }}
     >
       {children}

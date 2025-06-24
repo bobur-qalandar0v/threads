@@ -13,11 +13,13 @@ import SearchActiveIcon from "../assets/icons/SearchActiveIcon";
 import HeartActiveIcon from "../assets/icons/HeartActiveIcon";
 import ProfileActiveIcon from "../assets/icons/ProfileActiveIcon";
 import { ModalContext } from "../contexts/ModalContext";
+import { AuthContext } from "../contexts/AuthContext";
 
 function LeftMenu() {
   const [activeButton, setActiveButton] = useState(null);
 
   const { showLoading } = useContext(ModalContext);
+  const { userInfo } = useContext(AuthContext);
 
   const Location = useLocation();
 
@@ -36,7 +38,7 @@ function LeftMenu() {
       case "/activity":
         setActiveButton(3);
         break;
-      case "/profile":
+      case `/${userInfo?.username}`:
         setActiveButton(4);
         break;
     }
@@ -75,12 +77,20 @@ function LeftMenu() {
             </button>
           </div>
           <div className="heart hover">
-            <Link to="activity" onClick={() => handleButtonClick(3)}>
+            <Link
+              className="center__btns"
+              to="activity"
+              onClick={() => handleButtonClick(3)}
+            >
               {activeButton === 3 ? <HeartActiveIcon /> : <HeartIcon />}
             </Link>
           </div>
           <div className="profile hover">
-            <Link to="/profile" onClick={() => handleButtonClick(4)}>
+            <Link
+              className="center__btns"
+              to={`/${userInfo?.username}`}
+              onClick={() => handleButtonClick(4)}
+            >
               {activeButton === 4 ? <ProfileActiveIcon /> : <ProfileIcon />}
             </Link>
           </div>

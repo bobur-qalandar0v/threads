@@ -2,6 +2,7 @@ import ActivityPage from "../pages/Activity/ActivityPage";
 import DashboardPage from "../pages/Dashboard/DashboardPage";
 import ProfilePage from "../pages/Profile/ProfilePage";
 import SearchPage from "../pages/Search/SearchPage";
+import UserProfilePage from "../pages/UserProfile/UserProfilePage";
 
 export const routes = [
   {
@@ -21,7 +22,12 @@ export const routes = [
   },
   {
     id: 4,
-    path: "/profile",
+    path: "/:username",
     element: <ProfilePage />,
+  },
+  {
+    id: 5,
+    path: "/user/:nickName",
+    element: <UserProfilePage />,
   },
 ];

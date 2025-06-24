@@ -7,13 +7,16 @@ import Xicon from "./assets/icons/Xicon";
 import { API } from "./api";
 import { urls } from "./constants/urls";
 import { message } from "antd";
+import { AuthContext } from "./contexts/AuthContext";
 
 function ModalComponent() {
   const { openModal, handleCancel, loading, getPosts } =
     useContext(ModalContext);
   const [value, setValue] = useState("");
   const [isPublishing, setIsPublishing] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState([]); // Fayllar ro‘yxati
+  const [selectedFiles, setSelectedFiles] = useState([]);
+
+  const { userInfo } = useContext(AuthContext);
 
   const textareaRef = useRef(null);
 
@@ -58,6 +61,20 @@ function ModalComponent() {
         text: value,
         images: uploadedImages,
         videos: uploadedVideos,
+        nickName: userInfo?.username,
+        actions: [
+          {
+            likeCount: 0,
+            comentCount: 0,
+            shareCount: 0,
+          },
+        ],
+      };
+
+      const payloadMyPosts = {
+        text: value,
+        images: uploadedImages,
+        videos: uploadedVideos,
         actions: [
           {
             likeCount: 0,
@@ -69,6 +86,7 @@ function ModalComponent() {
 
       // Postni backendga yuborish (sening POST endpointingga)
       await API.post(urls.user_post.post, payload);
+      await API.post(urls.my_posts.post, payloadMyPosts);
 
       message.success("Post joylandi!");
 
@@ -93,7 +111,7 @@ function ModalComponent() {
     }
   }, [value]);
 
-  // 🔸 Fayl tanlanganda preview qilish
+  // Fayl tanlanganda preview qilish
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
 
@@ -106,12 +124,11 @@ function ModalComponent() {
     setSelectedFiles((prev) => [...prev, ...previews]);
   };
 
-  // 🔹 Faylni o‘chirish
+  // Faylni o‘chirish
   const handleRemoveFile = (index) => {
     setSelectedFiles((prev) => {
       const updated = [...prev];
 
-      // URLni xotiradan tozalash
       URL.revokeObjectURL(updated[index].url);
       updated.splice(index, 1);
       return updated;
@@ -122,10 +139,7 @@ function ModalComponent() {
 
   return (
     <div className="modal__overlay">
-      <div
-        className="modal__content"
-        // onClick={(e) => e.stopPropagation()}
-      >
+      <div className="modal__content">
         {loading ? (
           <div className="loader__wrap">
             <div className="loader"></div>
@@ -152,12 +166,16 @@ function ModalComponent() {
                 <img
                   width={50}
                   height={50}
-                  src="/dost.jpg"
+                  src={
+                    userInfo?.profile_img === ""
+                      ? userInfo?.profile_default_img
+                      : userInfo?.profile_img
+                  }
                   alt="user-img"
                   style={{ borderRadius: "24px", marginTop: "10px" }}
                 />
                 <div style={{ flex: 1 }}>
-                  <p className="username">bobur_qalandar0v</p>
+                  <p className="username">{userInfo?.username}</p>
                   <textarea
                     className="textarea"
                     ref={textareaRef}
@@ -184,8 +202,8 @@ function ModalComponent() {
                           src={item.url}
                           alt="preview"
                           style={{
-                            height: "300px",
                             width: "300px",
+                            height: "320px",
                             objectFit: "cover",
                             borderRadius: "8px",
                             cursor: "grab",
@@ -240,7 +258,7 @@ function ModalComponent() {
                               selectedFiles.length === 1 &&
                               selectedFiles[0].type === "video"
                                 ? "400px"
-                                : "350px"
+                                : "320px"
                             }`,
                             borderRadius: "8px",
                             cursor: "grab",

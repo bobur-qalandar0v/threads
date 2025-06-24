@@ -7,11 +7,28 @@ import CommentIcon from "../../assets/icons/CommentIcon";
 import ShareIcon from "../../assets/icons/ShareIcon";
 import DotsIcon from "../../assets/icons/DotsIcon";
 import { FavoriteContext } from "../../contexts/FavoriteContext";
+import SaveIcon from "../../assets/icons/SaveIcon";
+import NotInterestingIcon from "../../assets/icons/NotInterestingIcon";
+import BlokIcon from "../../assets/icons/BlokIcon";
+import LinkCopyIcon from "../../assets/icons/LinkCopyIcon";
+import ComplainIcon from "../../assets/icons/ComplainIcon";
+import { Link } from "react-router-dom";
+import { AuthContext } from "../../contexts/AuthContext";
 
 function DashboardPage() {
   const videoRefs = useRef([]);
+
+  const menuRef = useRef(null);
+
+  const dashboardMainRef = useRef(null);
+
+  const [animatedCounts, setAnimatedCounts] = useState({});
+
+  const [activePostId, setActivePostId] = useState(null);
+
   const { showLoading, post, getPosts } = useContext(ModalContext);
   const { addFavorites, favorite } = useContext(FavoriteContext);
+  const { userInfo } = useContext(AuthContext);
 
   const [mutedStates, setMutedStates] = useState({});
 
@@ -19,7 +36,31 @@ function DashboardPage() {
     showLoading();
   };
 
+  const handleInfoModal = (data) => {
+    setActivePostId(data);
+  };
+
   const handleFavorite = (data) => {
+    setAnimatedCounts((prev) => ({
+      ...prev,
+      [data.id]: {
+        value: favorite.some((item) => item.id === data.id)
+          ? Math.max(0, data.actions[0].likeCount - 1)
+          : data.actions[0].likeCount + 1,
+        animate: true,
+      },
+    }));
+
+    setTimeout(() => {
+      setAnimatedCounts((prev) => ({
+        ...prev,
+        [data.id]: {
+          ...prev[data.id],
+          animate: false,
+        },
+      }));
+    }, 600);
+
     addFavorites(data);
   };
 
@@ -35,11 +76,35 @@ function DashboardPage() {
   };
 
   useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setActivePostId(null);
+      }
+    };
+
+    const handleScroll = () => {
+      setActivePostId(null);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    if (dashboardMainRef.current) {
+      dashboardMainRef.current.addEventListener("scroll", handleScroll);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      if (dashboardMainRef.current) {
+        dashboardMainRef.current.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     const newStates = {};
     post.forEach((pItem, pIndex) => {
       pItem?.videos?.forEach((_, vIndex) => {
         const key = `${pIndex}-${vIndex}`;
-        newStates[key] = true; // Boshida hammasi muted
+        newStates[key] = true;
       });
     });
     setMutedStates(newStates);
@@ -76,15 +141,21 @@ function DashboardPage() {
       <div className="dashboard__header">
         <h3 className="title">Для вас</h3>
       </div>
-      <div className="dashboard__main">
+      <div className="dashboard__main" ref={dashboardMainRef}>
         <div className="dashboard__publish">
-          <img
-            width={45}
-            height={45}
-            style={{ borderRadius: "24px", cursor: "pointer" }}
-            src="/dost.jpg"
-            alt="profile-img"
-          />
+          <Link to={`/${userInfo?.username}`}>
+            <img
+              width={45}
+              height={45}
+              style={{ borderRadius: "24px", cursor: "pointer" }}
+              src={
+                userInfo?.profile_img === ""
+                  ? userInfo?.profile_default_img
+                  : userInfo?.profile_img
+              }
+              alt="profile-img"
+            />
+          </Link>
           <p className="dashboard__p" onClick={openModal}>
             Что нового?
           </p>
@@ -105,23 +176,73 @@ function DashboardPage() {
                       width={40}
                       height={40}
                       style={{ borderRadius: "24px" }}
-                      src="/dost.jpg"
+                      src={
+                        userInfo?.profile_img === ""
+                          ? userInfo?.profile_default_img
+                          : userInfo?.profile_img
+                      }
                       alt="img"
                     />
                   </div>
                   <div className="content__wrap">
                     <div className="header__wrapper">
-                      <p className="user__name">bobur_qalandar0v</p>
-                      <button className="dots__menu">
+                      <Link
+                        to={
+                          userInfo?.username === item.nickName
+                            ? `/${userInfo?.username}`
+                            : `/user/${item?.nickName}`
+                        }
+                        className="user__name"
+                      >
+                        {item.nickName}
+                      </Link>
+                      <button
+                        className="dots__menu"
+                        onClick={() => handleInfoModal(item.id)}
+                      >
                         <span>
                           <DotsIcon />
                         </span>
                       </button>
                     </div>
+                    {activePostId === item?.id && (
+                      <div className="post__menu-modal" ref={menuRef}>
+                        <ul className="post__menu-list">
+                          <li className="this__other">
+                            <span>Сохранить</span>
+                            <SaveIcon />
+                          </li>
+                          <li
+                            className="this__other"
+                            style={{ marginBottom: "8px" }}
+                          >
+                            <span>Не интересует</span>
+                            <NotInterestingIcon />
+                          </li>
+                          <span className="line"></span>
+                          <li className="other">
+                            <span>Заблокировать</span>
+                            <BlokIcon />
+                          </li>
+                          <li className="shikoyat">
+                            <span>Пожаловаться</span>
+                            <ComplainIcon />
+                          </li>
+                          <span className="line"></span>
+                          <li
+                            className="this__other"
+                            style={{ marginTop: "16px" }}
+                          >
+                            <span>Копировать ссылку</span>
+                            <LinkCopyIcon />
+                          </li>
+                        </ul>
+                      </div>
+                    )}
                     {item?.text && <p className="post__text">{item.text}</p>}
 
                     {(item?.videos?.length > 0 || item?.images?.length > 0) && (
-                      <div className="media__wrap">
+                      <div className="media__wrap" key={item?.id}>
                         {item?.videos?.map((i, videoIndex) => {
                           if (!i?.url) return null;
                           const key = `${postIndex}-${videoIndex}`;
@@ -132,11 +253,13 @@ function DashboardPage() {
                               className="video__wrap"
                               style={{
                                 width:
-                                  item?.videos?.length === 1
+                                  item?.videos?.length === 1 &&
+                                  item?.images?.length === 0
                                     ? "350px"
                                     : "260px",
                                 height:
-                                  item?.videos?.length === 1
+                                  item?.videos?.length === 1 &&
+                                  item?.images?.length === 0
                                     ? "430px"
                                     : "320px",
                                 position: "relative",
@@ -181,8 +304,18 @@ function DashboardPage() {
                               key={i.id}
                               className="image__wrap"
                               style={{
-                                width: "300px",
-                                height: "350px",
+                                width: `${
+                                  item?.images?.length === 1 &&
+                                  item?.videos?.length === 0
+                                    ? "300px"
+                                    : "320px"
+                                }`,
+                                height: `${
+                                  item?.images?.length === 1 &&
+                                  item?.videos?.length === 0
+                                    ? "320px"
+                                    : "320px"
+                                }`,
                                 flexShrink: 0,
                               }}
                             >
@@ -217,11 +350,15 @@ function DashboardPage() {
                                 }}
                               />
                               <span
+                                className={
+                                  animatedCounts[item.id]?.animate
+                                    ? "like-anim"
+                                    : ""
+                                }
                                 style={{
                                   color: `${isLiked ? "red" : "#fff"}`,
                                   fontSize: "17px",
-                                  display: "flex",
-                                  alignItems: "center",
+                                  marginTop: "4px",
                                 }}
                               >
                                 {i.likeCount === 0 ? null : i.likeCount}

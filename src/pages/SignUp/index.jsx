@@ -28,7 +28,13 @@ function SignUp() {
   };
 
   const onFinish = (values) => {
-    SignUp(values);
+    const payload = {
+      ...values,
+      profile_default_img:
+        "https://www.instagram.com/static/images/text_app/profile_picture/profile_pic.png/72f3228a91ee.png",
+    };
+
+    SignUp(payload);
   };
 
   const onFinishFailed = () => {
@@ -111,7 +117,7 @@ function SignUp() {
                     <UserRegisterIcon />
                   </span>
                   <Form.Item
-                    name="name-and-surname"
+                    name="name_and_surname"
                     rules={[
                       {
                         required: true,

@@ -8,4 +8,8 @@ export const urls = {
     patch: "/user_posts",
     get: "/user_posts",
   },
+  my_posts: {
+    get: "/my_posts",
+    post: "/my_posts",
+  },
 };
