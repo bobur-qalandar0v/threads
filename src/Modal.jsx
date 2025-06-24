@@ -167,7 +167,8 @@ function ModalComponent() {
                   width={50}
                   height={50}
                   src={
-                    userInfo?.profile_img === ""
+                    userInfo?.profile_img === "" ||
+                    userInfo?.profile_img === undefined
                       ? userInfo?.profile_default_img
                       : userInfo?.profile_img
                   }

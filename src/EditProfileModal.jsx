@@ -35,7 +35,7 @@ function EditProfileModal() {
   const [changeImage, setChangeImage] = useState(false);
 
   const [selectedImage, setSelectedImage] = useState([
-    { file: null, url: `${userInfo.profile_img}` },
+    { file: null, url: `${userInfo?.profile_img}` },
   ]);
 
   const handleSave = async (data) => {
@@ -208,6 +208,8 @@ function EditProfileModal() {
                 </div>
                 <div className="img__wrap">
                   {
+                    selectedImage[0]?.url === "undefined" ||
+                    selectedImage[0]?.url === "" ||
                     selectedImage.length === 0 ? (
                       <label style={{ cursor: "pointer" }}>
                         <div

@@ -149,7 +149,8 @@ function DashboardPage() {
               height={45}
               style={{ borderRadius: "24px", cursor: "pointer" }}
               src={
-                userInfo?.profile_img === ""
+                userInfo?.profile_img === "" ||
+                userInfo?.profile_img === undefined
                   ? userInfo?.profile_default_img
                   : userInfo?.profile_img
               }
@@ -177,7 +178,8 @@ function DashboardPage() {
                       height={40}
                       style={{ borderRadius: "24px" }}
                       src={
-                        userInfo?.profile_img === ""
+                        userInfo?.profile_img === "" ||
+                        userInfo?.profile_img === undefined
                           ? userInfo?.profile_default_img
                           : userInfo?.profile_img
                       }
