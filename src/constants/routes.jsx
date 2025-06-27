@@ -27,7 +27,7 @@ export const routes = [
   },
   {
     id: 5,
-    path: "/user/:nickName",
+    path: "/user/:username",
     element: <UserProfilePage />,
   },
 ];

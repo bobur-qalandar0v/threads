@@ -3,30 +3,34 @@ import { Button, Form, Input, message } from "antd";
 import UserIcon from "../../assets/icons/UsreIcon";
 import PasswordIcon from "../../assets/icons/PasswordIcon";
 import { useNavigate } from "react-router-dom";
-import { API } from "../../api";
-import { urls } from "../../constants/urls";
+import { API, Backend } from "../../api";
+import { backendurls, urls } from "../../constants/urls";
 import { AuthContext } from "../../contexts/AuthContext";
 
 function SignIn() {
-  const { setUserToken } = useContext(AuthContext);
+  const { setUserToken, setLocalUserInfo } = useContext(AuthContext);
 
   const [form] = Form.useForm();
 
   const navigate = useNavigate();
 
   const SignIn = (data) => {
-    API.post(`${urls.auth.login}`, data)
+    Backend.post(`${backendurls.auth.login}`, data)
       .then((res) => {
-        console.log(res);
-        if (res.status == 201) {
-          setUserToken(res.data.token);
-          message.success("Kirish bajarildi");
+        if (res.status == 200) {
+          setUserToken(res.data?.refresh, res.data?.access);
+          message.success("Tizimga muvaffaiyatli kirildi");
           navigate("/");
+          setLocalUserInfo(res.data?.user);
+        } else {
+          message.error("Tizimda xatolik");
         }
       })
       .catch((err) => {
-        if (err.response.data.error == "Unauthorized") {
+        if (err?.status === 400) {
           message.error("Foydalanuvchi nomi yoki parol xato!");
+        } else {
+          message.error("Tizimda xatolik");
         }
       });
   };
@@ -59,7 +63,7 @@ function SignIn() {
                   <UserIcon />
                 </span>
                 <Form.Item
-                  name="username"
+                  name="login"
                   rules={[
                     {
                       required: true,

@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from "react";
-import { API } from "../api";
-import { urls } from "../constants/urls";
+import { API, Backend } from "../api";
+import { backendurls, urls } from "../constants/urls";
 import { ModalContext } from "./ModalContext";
 
 export const FavoriteContext = createContext(null);
@@ -11,34 +11,81 @@ export function FavoriteProvider({ children }) {
     : [];
 
   const [favorite, setFavorite] = useState(localeInitial);
-  const { getPosts } = useContext(ModalContext);
+  const { getPosts, setPost, getMyPosts, getHandleLike } =
+    useContext(ModalContext);
 
   function setLocalFavorite(data) {
     localStorage.setItem("favorite", JSON.stringify(data));
     setFavorite(data);
   }
 
-  function addFavorites(data) {
-    const isLiked = favorite.some((item) => item.id === data.id);
+  // function addFavorites(data) {
+  //   const isLiked = favorite.some((item) => item.id === data.id);
 
-    const updatedActions = {
-      ...data.actions[0],
-      likeCount: isLiked
-        ? Math.max(0, data.actions[0].likeCount - 1)
-        : data.actions[0].likeCount + 1,
-    };
+  //   const updatedActions = {
+  //     ...data.actions[0],
+  //     likeCount: isLiked
+  //       ? Math.max(0, data.actions[0].likeCount - 1)
+  //       : data.actions[0].likeCount + 1,
+  //   };
 
+  //   if (isLiked) {
+  //     setLocalFavorite(favorite.filter((item) => item.id !== data.id));
+  //   } else {
+  //     setLocalFavorite([...favorite, data]);
+  //   }
+
+  //   API.patch(`${urls.user_post.patch}/${data.id}`, {
+  //     actions: [updatedActions],
+  //   }).then((res) => {
+  //     getHandleLike();
+  //   });
+  // }
+
+  function addFavorites(updatedData, isLiked) {
+    // LocalStorage favoritni yangilash
     if (isLiked) {
-      setLocalFavorite(favorite.filter((item) => item.id !== data.id));
+      setLocalFavorite(favorite.filter((item) => item.uid !== updatedData.uid));
     } else {
-      setLocalFavorite([...favorite, data]);
+      setLocalFavorite([...favorite, updatedData]);
     }
 
-    API.patch(`${urls.user_post.patch}/${data.id}`, {
-      actions: [updatedActions],
-    }).then(() => {
-      getPosts();
-    });
+    // Backend so‘rovi (faqat signal sifatida)
+    Backend.post(`${backendurls.user_post.like}/${updatedData.uid}/like`, {
+      likes_count: updatedData.likes_count,
+    })
+      .then((res) => {
+        if (res.status === 201) {
+          // Post ro‘yxatini yangilash
+          setPost((prevPosts) =>
+            prevPosts.map((post) =>
+              post.uid === updatedData.uid
+                ? { ...post, likes_count: updatedData.likes_count }
+                : post
+            )
+          );
+        }
+      })
+      .catch((err) => {
+        console.error("Like request error:", err);
+      });
+
+    //// PATCH SO'ROV
+    // Backend.patch(`${backendurls.user_post.like}/${updatedData.uid}/like/`, {
+    //   likes_count: updatedData.likes_count,
+    // })
+    //   .then((res) => {
+    //     if (res.status === 200 || res.status === 201) {
+    //       setPost((prevPosts) =>
+    //         prevPosts.map((post) =>
+    //           post.uid === updatedData.uid
+    //             ? { ...post, likes_count: updatedData.likes_count }
+    //             : post
+    //         )
+    //       );
+    //     }
+    //   })
+    //   .catch((err) => console.error("PATCH error:", err));
   }
 
   function deleteFavorite(id) {

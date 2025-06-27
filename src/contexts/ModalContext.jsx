@@ -1,23 +1,38 @@
-import { createContext, useEffect, useState } from "react";
-import { API } from "../api";
-import { urls } from "../constants/urls";
+import { createContext, useEffect, useRef, useState } from "react";
+import { API, Backend } from "../api";
+import { backendurls, urls } from "../constants/urls";
 
 export const ModalContext = createContext(null);
 
 export const ModalProvider = ({ children }) => {
+  const openMenuRef = useRef(null);
+
+  const mainRef = useRef(null);
+
   const [openModal, setOpenModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [editModal, setEditModal] = useState(false);
+  const [openMenu, setOpenMenu] = useState(false);
 
   const [post, setPost] = useState([]);
+
   const [muted, setMuted] = useState(true);
 
   const getPosts = () => {
-    API.get(urls.user_post.get).then((res) => {
-      const sorted = res?.data?.sort((a, b) => b.id - a.id);
-      setPost(sorted);
+    Backend.get(backendurls.user_post.get).then((res) => {
+      setPost(res.data);
       setMuted(res.data.map(() => true));
     });
+  };
+
+  const getHandleLike = (updatePostId, updatedLikesCount) => {
+    setPost((prevPosts) =>
+      prevPosts.map((post) =>
+        post.uid === updatePostId
+          ? { ...post, likes_count: updatedLikesCount }
+          : post
+      )
+    );
   };
 
   const showLoading = () => {
@@ -26,7 +41,7 @@ export const ModalProvider = ({ children }) => {
 
     setTimeout(() => {
       setLoading(false);
-    }, 400);
+    }, 0);
   };
 
   const showEditModal = () => {
@@ -62,6 +77,11 @@ export const ModalProvider = ({ children }) => {
         editModal,
         setEditModal,
         showEditModal,
+        openMenu,
+        setOpenMenu,
+        openMenuRef,
+        mainRef,
+        getHandleLike,
       }}
     >
       {children}

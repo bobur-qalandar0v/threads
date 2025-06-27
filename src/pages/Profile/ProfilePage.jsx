@@ -1,12 +1,26 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import InsightsIcon from "../../assets/icons/InsigthsIcon";
 import { AuthContext } from "../../contexts/AuthContext";
 import { Link, NavLink, Outlet } from "react-router-dom";
 import { ModalContext } from "../../contexts/ModalContext";
+import { Backend } from "../../api";
 
 function ProfilePage() {
-  const { userInfo, loading } = useContext(AuthContext);
+  const { userInfo, loading, userLocalData } = useContext(AuthContext);
   const { showEditModal } = useContext(ModalContext);
+
+  const getBackend = async () => {
+    try {
+      const res = await Backend.get(`/${userLocalData?.username}`);
+      // console.log(res);
+    } catch (err) {
+      console.error("Xatolik:", err);
+    }
+  };
+
+  useEffect(() => {
+    getBackend();
+  }, []);
 
   return (
     <div className="profile">
@@ -23,8 +37,8 @@ function ProfilePage() {
             <div className="profile__top">
               <div className="profile__username-photo">
                 <div className="left">
-                  <h2>{userInfo?.name_and_surname}</h2>
-                  <p>{userInfo?.username}</p>
+                  <h2>{userLocalData?.fullname}</h2>
+                  <p>{userLocalData?.username}</p>
                 </div>
                 <div className="right">
                   <button>
@@ -33,10 +47,9 @@ function ProfilePage() {
                       height={90}
                       style={{ borderRadius: "50%" }}
                       src={
-                        userInfo?.profile_img === "" ||
-                        userInfo?.profile_img === undefined
-                          ? userInfo?.profile_default_img
-                          : userInfo?.profile_img
+                        userLocalData?.photo === null
+                          ? "https://www.instagram.com/static/images/text_app/profile_picture/profile_pic.png/72f3228a91ee.png"
+                          : userLocalData?.photo
                       }
                       alt="img"
                     />
@@ -44,9 +57,9 @@ function ProfilePage() {
                 </div>
               </div>
               <div className="profile__follow-insights">
-                {userInfo?.user_bio === "" ? null : (
+                {userLocalData?.bio === null ? null : (
                   <div className="profile__bio">
-                    <p style={{ color: "#fff" }}>{userInfo?.user_bio}</p>
+                    <p style={{ color: "#fff" }}>{userLocalData?.bio}</p>
                   </div>
                 )}
                 <div className="follows">
@@ -80,16 +93,16 @@ function ProfilePage() {
                       </div>
                       <span>59 подписчиков</span>
                     </div>
-                    {userInfo?.user_url === "" ? null : (
+                    {userLocalData?.link === null ? null : (
                       <div className="user__url-wrap">
                         <Link
-                          to={userInfo?.user_url}
+                          to={userLocalData?.link}
                           className="user_url"
                           target="_blank"
                         >
-                          {userInfo?.user_url?.slice(
+                          {userLocalData?.link?.slice(
                             8,
-                            userInfo?.user_url?.length
+                            userLocalData?.link?.length
                           )}
                         </Link>
                       </div>
@@ -112,7 +125,7 @@ function ProfilePage() {
               <div className="center__wrap">
                 <div className="tabs">
                   <NavLink
-                    to={`/${userInfo?.username}`}
+                    to={`/${userLocalData?.username}`}
                     end
                     className={`links ${(isActive) =>
                       isActive ? "active" : ""}`}
@@ -122,13 +135,13 @@ function ProfilePage() {
                   <NavLink
                     className={`links ${(isActive) =>
                       isActive ? "active" : ""}`}
-                    to={`/${userInfo?.username}/replies`}
+                    to={`/${userLocalData?.username}/replies`}
                     end
                   >
                     Ответы
                   </NavLink>
                   <NavLink
-                    to={`/${userInfo?.username}/media`}
+                    to={`/${userLocalData?.username}/media`}
                     end
                     className={`links ${(isActive) =>
                       isActive ? "active" : ""}`}
@@ -136,7 +149,7 @@ function ProfilePage() {
                     Медиафайлы
                   </NavLink>
                   <NavLink
-                    to={`/${userInfo?.username}/reposts`}
+                    to={`/${userLocalData?.username}/reposts`}
                     end
                     className={`links ${(isActive) =>
                       isActive ? "active" : ""}`}

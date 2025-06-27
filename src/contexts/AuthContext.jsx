@@ -5,23 +5,40 @@ import { urls } from "../constants/urls";
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const local = localStorage.getItem("token")
-    ? localStorage.getItem("token")
+  const localRefreshToken = localStorage.getItem("refresh_token")
+    ? localStorage.getItem("refresh_token")
+    : "";
+
+  const localAccessToken = localStorage.getItem("access_token")
+    ? localStorage.getItem("access_token")
     : "";
 
   const localUser = localStorage.getItem("UserId")
     ? JSON.parse(localStorage.getItem("UserId"))
     : null;
 
+  const localUserData = localStorage.getItem("UserData")
+    ? JSON.parse(localStorage.getItem("UserData"))
+    : {};
+
   const [loading, setLoading] = useState(false);
-  const [token, setToken] = useState(local);
+  const [refreshToken, setRefreshToken] = useState(localRefreshToken);
+  const [accessToken, setAccessToken] = useState(localAccessToken);
   const [isAuth, setIsAuth] = useState(false);
   const [userId, setUserId] = useState(localUser);
   const [userInfo, setUserInfo] = useState([]);
+  const [userLocalData, setUserLocalData] = useState(localUserData);
 
-  const setUserToken = (token) => {
-    localStorage.setItem("token", token);
-    setToken(token);
+  const setUserToken = (refresh_token, access_token) => {
+    localStorage.setItem("refresh_token", refresh_token);
+    localStorage.setItem("access_token", access_token);
+    setRefreshToken(refresh_token);
+    setAccessToken(refresh_token);
+  };
+
+  const setLocalUserInfo = (data) => {
+    localStorage.setItem("UserData", JSON.stringify(data));
+    setUserLocalData(data);
   };
 
   const setUserData = (data) => {
@@ -43,26 +60,27 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    setIsAuth(!!local && local.length > 0);
-  }, [token]);
-
-  useEffect(() => {
     getUserData();
   }, []);
 
   return (
     <AuthContext.Provider
       value={{
-        loading,
-        token,
+        userId,
         isAuth,
+        loading,
+        refreshToken,
+        accessToken,
+        userInfo,
+        userLocalData,
         setIsAuth,
         setUserToken,
         setUserData,
-        userId,
-        userInfo,
         getUserData,
         setUserInfo,
+        setAccessToken,
+        setUserLocalData,
+        setLocalUserInfo,
       }}
     >
       {children}

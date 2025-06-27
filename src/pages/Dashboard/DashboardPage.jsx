@@ -14,6 +14,8 @@ import LinkCopyIcon from "../../assets/icons/LinkCopyIcon";
 import ComplainIcon from "../../assets/icons/ComplainIcon";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../../contexts/AuthContext";
+import { Backend } from "../../api";
+import { backendurls } from "../../constants/urls";
 
 function DashboardPage() {
   const videoRefs = useRef([]);
@@ -22,13 +24,13 @@ function DashboardPage() {
 
   const dashboardMainRef = useRef(null);
 
-  const [animatedCounts, setAnimatedCounts] = useState({});
-
-  const [activePostId, setActivePostId] = useState(null);
-
   const { showLoading, post, getPosts } = useContext(ModalContext);
   const { addFavorites, favorite } = useContext(FavoriteContext);
-  const { userInfo } = useContext(AuthContext);
+  const { userLocalData } = useContext(AuthContext);
+
+  const [animatedCounts, setAnimatedCounts] = useState({});
+
+  const [activePostUid, setActivePostUid] = useState(null);
 
   const [mutedStates, setMutedStates] = useState({});
 
@@ -37,16 +39,19 @@ function DashboardPage() {
   };
 
   const handleInfoModal = (data) => {
-    setActivePostId(data);
+    setActivePostUid(data);
   };
 
   const handleFavorite = (data) => {
+    const isLiked = favorite.some((item) => item.uid === data.uid);
+    const updatedLikesCount = isLiked
+      ? Math.max(0, data.likes_count - 1)
+      : data.likes_count + 1;
+
     setAnimatedCounts((prev) => ({
       ...prev,
-      [data.id]: {
-        value: favorite.some((item) => item.id === data.id)
-          ? Math.max(0, data.actions[0].likeCount - 1)
-          : data.actions[0].likeCount + 1,
+      [data.uid]: {
+        value: updatedLikesCount,
         animate: true,
       },
     }));
@@ -54,14 +59,16 @@ function DashboardPage() {
     setTimeout(() => {
       setAnimatedCounts((prev) => ({
         ...prev,
-        [data.id]: {
-          ...prev[data.id],
+        [data.uid]: {
+          ...prev[data.uid],
           animate: false,
         },
       }));
     }, 600);
 
-    addFavorites(data);
+    // Shu yerda data object’ni yangilab, addFavorites ga yuboramiz
+    const updatedData = { ...data, likes_count: updatedLikesCount };
+    addFavorites(updatedData, isLiked); // yangi like soni bor
   };
 
   const handleMute = (postIndex, videoIndex) => {
@@ -78,12 +85,12 @@ function DashboardPage() {
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setActivePostId(null);
+        setActivePostUid(null);
       }
     };
 
     const handleScroll = () => {
-      setActivePostId(null);
+      setActivePostUid(null);
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -104,10 +111,12 @@ function DashboardPage() {
     post.forEach((pItem, pIndex) => {
       pItem?.videos?.forEach((_, vIndex) => {
         const key = `${pIndex}-${vIndex}`;
-        newStates[key] = true;
+        if (!(key in mutedStates)) {
+          newStates[key] = true;
+        }
       });
     });
-    setMutedStates(newStates);
+    setMutedStates((prev) => ({ ...prev, ...newStates }));
   }, [post]);
 
   useEffect(() => {
@@ -143,16 +152,15 @@ function DashboardPage() {
       </div>
       <div className="dashboard__main" ref={dashboardMainRef}>
         <div className="dashboard__publish">
-          <Link to={`/${userInfo?.username}`}>
+          <Link to={`/${userLocalData?.username}`}>
             <img
               width={45}
               height={45}
               style={{ borderRadius: "24px", cursor: "pointer" }}
               src={
-                userInfo?.profile_img === "" ||
-                userInfo?.profile_img === undefined
-                  ? userInfo?.profile_default_img
-                  : userInfo?.profile_img
+                userLocalData?.photo === null
+                  ? "https://www.instagram.com/static/images/text_app/profile_picture/profile_pic.png/72f3228a91ee.png"
+                  : userLocalData?.photo
               }
               alt="profile-img"
             />
@@ -167,7 +175,7 @@ function DashboardPage() {
         <span className="publish__line"></span>
 
         {post?.map((item, postIndex) => {
-          const isLiked = favorite.some((fav) => fav.id === item.id);
+          const isLiked = favorite.some((fav) => fav.uid === item.uid);
           return (
             <div className="posts-list" key={postIndex}>
               <div className="posts__list-wrap">
@@ -178,10 +186,9 @@ function DashboardPage() {
                       height={40}
                       style={{ borderRadius: "24px" }}
                       src={
-                        userInfo?.profile_img === "" ||
-                        userInfo?.profile_img === undefined
-                          ? userInfo?.profile_default_img
-                          : userInfo?.profile_img
+                        item?.author?.photo === null
+                          ? "https://www.instagram.com/static/images/text_app/profile_picture/profile_pic.png/72f3228a91ee.png"
+                          : item?.author?.photo
                       }
                       alt="img"
                     />
@@ -190,24 +197,24 @@ function DashboardPage() {
                     <div className="header__wrapper">
                       <Link
                         to={
-                          userInfo?.username === item.nickName
-                            ? `/${userInfo?.username}`
-                            : `/user/${item?.nickName}`
+                          userLocalData?.username === item?.author?.username
+                            ? `/@${userLocalData?.username}`
+                            : `/user/@${item?.author?.username}`
                         }
                         className="user__name"
                       >
-                        {item.nickName}
+                        {item?.author?.username}
                       </Link>
                       <button
                         className="dots__menu"
-                        onClick={() => handleInfoModal(item.id)}
+                        onClick={() => handleInfoModal(item?.uid)}
                       >
                         <span>
                           <DotsIcon />
                         </span>
                       </button>
                     </div>
-                    {activePostId === item?.id && (
+                    {activePostUid === item?.uid && (
                       <div className="post__menu-modal" ref={menuRef}>
                         <ul className="post__menu-list">
                           <li className="this__other">
@@ -241,17 +248,18 @@ function DashboardPage() {
                         </ul>
                       </div>
                     )}
-                    {item?.text && <p className="post__text">{item.text}</p>}
+                    {item?.content && (
+                      <p className="post__text">{item?.content}</p>
+                    )}
 
                     {(item?.videos?.length > 0 || item?.images?.length > 0) && (
-                      <div className="media__wrap" key={item?.id}>
+                      <div className="media__wrap" key={item?.uid}>
                         {item?.videos?.map((i, videoIndex) => {
-                          if (!i?.url) return null;
+                          if (!i?.media) return null;
                           const key = `${postIndex}-${videoIndex}`;
                           const refIndex = postIndex * 1000 + videoIndex;
                           return (
                             <div
-                              key={i.id}
                               className="video__wrap"
                               style={{
                                 width:
@@ -272,7 +280,7 @@ function DashboardPage() {
                                 ref={(el) => {
                                   if (el) videoRefs.current[refIndex] = el;
                                 }}
-                                src={i.url}
+                                src={i?.media}
                                 muted={mutedStates[key]}
                                 loop
                                 playsInline
@@ -300,92 +308,93 @@ function DashboardPage() {
                           );
                         })}
 
-                        {item?.images?.map((i) =>
-                          !i?.url ? null : (
-                            <div
-                              key={i.id}
-                              className="image__wrap"
+                        {item?.images?.map((i) => (
+                          <div
+                            className="image__wrap"
+                            style={{
+                              width: `${
+                                item?.images?.length === 1 &&
+                                item?.videos?.length === 0
+                                  ? "300px"
+                                  : "320px"
+                              }`,
+                              height: `${
+                                item?.images?.length === 1 &&
+                                item?.videos?.length === 0
+                                  ? "320px"
+                                  : "320px"
+                              }`,
+                              flexShrink: 0,
+                            }}
+                          >
+                            <img
+                              src={i.media}
+                              alt="image"
                               style={{
-                                width: `${
-                                  item?.images?.length === 1 &&
-                                  item?.videos?.length === 0
-                                    ? "300px"
-                                    : "320px"
-                                }`,
-                                height: `${
-                                  item?.images?.length === 1 &&
-                                  item?.videos?.length === 0
-                                    ? "320px"
-                                    : "320px"
-                                }`,
-                                flexShrink: 0,
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                                borderRadius: "8px",
                               }}
-                            >
-                              <img
-                                src={i.url}
-                                alt="image"
-                                style={{
-                                  width: "100%",
-                                  height: "100%",
-                                  objectFit: "cover",
-                                  borderRadius: "8px",
-                                }}
-                              />
-                            </div>
-                          )
-                        )}
+                            />
+                          </div>
+                        ))}
                       </div>
                     )}
 
-                    {item?.actions?.map((i) => (
-                      <div className="actions" key={i.id}>
-                        <div className="actions__wrap">
-                          <div className="heart__action">
-                            <button
-                              className="actions__icon"
-                              onClick={() => handleFavorite(item)}
+                    <div className="actions">
+                      <div className="actions__wrap">
+                        <div className="heart__action">
+                          <button
+                            className="actions__icon"
+                            onClick={() => handleFavorite(item)}
+                          >
+                            <HeartActionIcon
+                              style={{
+                                fill: isLiked ? "red" : "none",
+                                stroke: isLiked ? "red" : "#fff",
+                              }}
+                            />
+                            <span
+                              className={
+                                animatedCounts[item.uid]?.animate
+                                  ? "like-anim"
+                                  : ""
+                              }
+                              style={{
+                                color: `${isLiked ? "red" : "#fff"}`,
+                                fontSize: "17px",
+                                marginTop: "4px",
+                              }}
                             >
-                              <HeartActionIcon
-                                style={{
-                                  fill: isLiked ? "red" : "none",
-                                  stroke: isLiked ? "red" : "#fff",
-                                }}
-                              />
-                              <span
-                                className={
-                                  animatedCounts[item.id]?.animate
-                                    ? "like-anim"
-                                    : ""
-                                }
-                                style={{
-                                  color: `${isLiked ? "red" : "#fff"}`,
-                                  fontSize: "17px",
-                                  marginTop: "4px",
-                                }}
-                              >
-                                {i.likeCount === 0 ? null : i.likeCount}
-                              </span>
-                            </button>
-                          </div>
-                          <div className="comment__action">
-                            <button className="actions__icon">
-                              <CommentIcon />
-                              <span style={{ fontSize: "17px" }}>
-                                {i.comentCount === 0 ? null : i.comentCount}
-                              </span>
-                            </button>
-                          </div>
-                          <div className="share__action">
-                            <button className="actions__icon">
-                              <ShareIcon />
-                              <span style={{ fontSize: "17px" }}>
-                                {i.shareCount === 0 ? null : i.shareCount}
-                              </span>
-                            </button>
-                          </div>
+                              {item?.likes_count === 0
+                                ? null
+                                : item?.likes_count}
+                            </span>
+                          </button>
+                        </div>
+                        <div className="comment__action">
+                          <button className="actions__icon">
+                            <CommentIcon />
+                            <span style={{ fontSize: "17px" }}>
+                              {item?.comments_count === 0
+                                ? null
+                                : item?.comments_count}
+                            </span>
+                          </button>
+                        </div>
+                        <div className="share__action">
+                          <button className="actions__icon">
+                            <ShareIcon />
+                            <span style={{ fontSize: "17px" }}>
+                              {item?.views_count === 0
+                                ? null
+                                : item?.views_count}
+                            </span>
+                          </button>
                         </div>
                       </div>
-                    ))}
+                    </div>
                   </div>
                 </div>
               </div>

@@ -16,19 +16,27 @@ import { ModalContext } from "../contexts/ModalContext";
 import { AuthContext } from "../contexts/AuthContext";
 
 function LeftMenu() {
+  const Location = useLocation();
+
+  const { showLoading, setOpenMenu, openMenu } = useContext(ModalContext);
+  const { userInfo, userLocalData } = useContext(AuthContext);
+
   const [activeButton, setActiveButton] = useState(null);
 
-  const { showLoading } = useContext(ModalContext);
-  const { userInfo } = useContext(AuthContext);
-
-  const Location = useLocation();
+  const handleOpenMenu = () => {
+    if (openMenu) {
+      setOpenMenu(false);
+    } else {
+      setOpenMenu(true);
+    }
+  };
 
   const handleButtonClick = (item) => {
     setActiveButton(item);
   };
 
   useEffect(() => {
-    switch (Location.pathname) {
+    switch (Location?.pathname) {
       case "/":
         setActiveButton(1);
         break;
@@ -38,11 +46,11 @@ function LeftMenu() {
       case "/activity":
         setActiveButton(3);
         break;
-      case `/${userInfo?.username}`:
+      case `/@${userLocalData?.username}`:
         setActiveButton(4);
         break;
     }
-  }, [Location.pathname]);
+  }, [Location.pathname, userInfo]);
 
   return (
     <div className="menu__wrap">
@@ -88,7 +96,7 @@ function LeftMenu() {
           <div className="profile hover">
             <Link
               className="center__btns"
-              to={`/${userInfo?.username}`}
+              to={`/@${userLocalData?.username}`}
               onClick={() => handleButtonClick(4)}
             >
               {activeButton === 4 ? <ProfileActiveIcon /> : <ProfileIcon />}
@@ -96,14 +104,36 @@ function LeftMenu() {
           </div>
         </div>
         <div className="menu__bottom">
-          <div>
-            <button>
+          <div
+            style={{
+              width: "100%",
+              height: "50%",
+            }}
+          >
+            <button
+              style={{
+                width: "100%",
+                height: "100%",
+              }}
+            >
               <AttachIcon className="attach__icon" />
             </button>
           </div>
-          <div>
-            <button>
-              <MoreIcon className="more__icon" />
+          <div
+            style={{
+              width: "100%",
+              height: "50%",
+            }}
+          >
+            <button
+              className="open__menu"
+              style={{
+                width: "100%",
+                height: "100%",
+              }}
+              onClick={() => handleOpenMenu()}
+            >
+              <MoreIcon className={`more__icon ${openMenu ? "active" : ""}`} />
             </button>
           </div>
         </div>

@@ -15,8 +15,7 @@ function EditProfileModal() {
 
   const { editModal, loading, setEditModal } = useContext(ModalContext);
 
-  const { userInfo, setUserInfo, userId, getUserData } =
-    useContext(AuthContext);
+  const { userInfo, userId, getUserData } = useContext(AuthContext);
 
   useEffect(() => {
     if (userInfo?.profile_img) {
@@ -95,11 +94,22 @@ function EditProfileModal() {
   };
 
   const handleDelete = () => {
-    setSelectedImage([]);
+    setSelectedImage([
+      {
+        file: null,
+        url: "",
+      },
+    ]);
     setChangeImage(false);
   };
 
   const handleClose = () => {
+    setSelectedImage([
+      {
+        file: null,
+        url: "",
+      },
+    ]);
     getUserData();
     setChangeImage(false);
     setEditModal(false);
