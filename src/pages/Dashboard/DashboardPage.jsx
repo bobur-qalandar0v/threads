@@ -24,7 +24,7 @@ function DashboardPage() {
 
   const dashboardMainRef = useRef(null);
 
-  const { showLoading, post, getPosts } = useContext(ModalContext);
+  const { showLoading, post, getPosts, loading } = useContext(ModalContext);
   const { addFavorites, favorite } = useContext(FavoriteContext);
   const { userLocalData } = useContext(AuthContext);
 
@@ -145,7 +145,11 @@ function DashboardPage() {
     getPosts();
   }, []);
 
-  return (
+  return loading ? (
+    <div className="loader__wrap">
+      <div className="loader"></div>
+    </div>
+  ) : (
     <div className="dashboard">
       <div className="dashboard__header">
         <h3 className="title">Для вас</h3>
@@ -405,5 +409,4 @@ function DashboardPage() {
     </div>
   );
 }
-
 export default DashboardPage;

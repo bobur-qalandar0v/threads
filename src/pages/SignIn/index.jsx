@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { Button, Form, Input, message } from "antd";
 import UserIcon from "../../assets/icons/UsreIcon";
 import PasswordIcon from "../../assets/icons/PasswordIcon";
@@ -10,11 +10,12 @@ import { AuthContext } from "../../contexts/AuthContext";
 function SignIn() {
   const { setUserToken, setLocalUserInfo } = useContext(AuthContext);
 
-  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
   const SignIn = (data) => {
+    setLoading(true);
     Backend.post(`${backendurls.auth.login}`, data)
       .then((res) => {
         if (res.status == 200) {
@@ -32,6 +33,9 @@ function SignIn() {
         } else {
           message.error("Tizimda xatolik");
         }
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -95,7 +99,12 @@ function SignIn() {
                 </Form.Item>
               </div>
               <Form.Item className="btn__wrap">
-                <Button className="button1" htmlType="submit">
+                <Button
+                  className="button1"
+                  htmlType="submit"
+                  loading={loading}
+                  disabled={loading}
+                >
                   Tizimga kirish
                 </Button>
               </Form.Item>

@@ -1,6 +1,7 @@
 import { createContext, useEffect, useRef, useState } from "react";
 import { API, Backend } from "../api";
 import { backendurls, urls } from "../constants/urls";
+import { message } from "antd";
 
 export const ModalContext = createContext(null);
 
@@ -19,10 +20,19 @@ export const ModalProvider = ({ children }) => {
   const [muted, setMuted] = useState(true);
 
   const getPosts = () => {
-    Backend.get(backendurls.user_post.get).then((res) => {
-      setPost(res.data);
-      setMuted(res.data.map(() => true));
-    });
+    setLoading(true);
+    Backend.get(backendurls.user_post.get)
+      .then((res) => {
+        setPost(res.data);
+        setMuted(res.data.map(() => true));
+      })
+      .catch((err) => {
+        message.error("Xatolik");
+        console.error(err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   const getHandleLike = (updatePostId, updatedLikesCount) => {

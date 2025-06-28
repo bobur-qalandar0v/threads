@@ -7,13 +7,13 @@ import { ModalProvider } from "./contexts/ModalContext.jsx";
 import { FavoriteProvider } from "./contexts/FavoriteContext.jsx";
 
 createRoot(document.getElementById("root")).render(
-  <ModalProvider>
-    <FavoriteProvider>
-      <AuthProvider>
+  <AuthProvider>
+    <ModalProvider>
+      <FavoriteProvider>
         <BrowserRouter>
           <App />
         </BrowserRouter>
-      </AuthProvider>
-    </FavoriteProvider>
-  </ModalProvider>
+      </FavoriteProvider>
+    </ModalProvider>
+  </AuthProvider>
 );

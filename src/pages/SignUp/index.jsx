@@ -23,10 +23,10 @@ function SignUp() {
     Backend.post(`${backendurls.auth.register}`, data)
       .then((res) => {
         if (res.status == 201) {
-          // setUserToken(res.data?.refresh, res.data?.access);
-          // setLocalUserInfo(res.data);
+          setUserToken(res.data?.refresh, res.data?.access);
+          setLocalUserInfo(res.data.user);
           console.log(res);
-          // navigate("/");
+          navigate("/");
           message.success(res.data?.message);
         }
       })

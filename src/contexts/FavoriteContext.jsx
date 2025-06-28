@@ -2,6 +2,8 @@ import { createContext, useContext, useState } from "react";
 import { API, Backend } from "../api";
 import { backendurls, urls } from "../constants/urls";
 import { ModalContext } from "./ModalContext";
+import { message } from "antd";
+import { AuthContext } from "./AuthContext";
 
 export const FavoriteContext = createContext(null);
 
@@ -13,6 +15,8 @@ export function FavoriteProvider({ children }) {
   const [favorite, setFavorite] = useState(localeInitial);
   const { getPosts, setPost, getMyPosts, getHandleLike } =
     useContext(ModalContext);
+
+  const { access_token } = useContext(AuthContext);
 
   function setLocalFavorite(data) {
     localStorage.setItem("favorite", JSON.stringify(data));
@@ -51,9 +55,18 @@ export function FavoriteProvider({ children }) {
     }
 
     // Backend so‘rovi (faqat signal sifatida)
-    Backend.post(`${backendurls.user_post.like}/${updatedData.uid}/like`, {
-      likes_count: updatedData.likes_count,
-    })
+    Backend.post(
+      `${backendurls.user_post.like}/${updatedData.uid}/like`,
+      {
+        likes_count: updatedData.likes_count,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    )
       .then((res) => {
         if (res.status === 201) {
           // Post ro‘yxatini yangilash
@@ -70,7 +83,7 @@ export function FavoriteProvider({ children }) {
         console.error("Like request error:", err);
       });
 
-    //// PATCH SO'ROV
+    // // PATCH SO'ROV
     // Backend.patch(`${backendurls.user_post.like}/${updatedData.uid}/like/`, {
     //   likes_count: updatedData.likes_count,
     // })
@@ -85,7 +98,10 @@ export function FavoriteProvider({ children }) {
     //       );
     //     }
     //   })
-    //   .catch((err) => console.error("PATCH error:", err));
+    //   .catch((err) => {
+    //     console.error("Like request error:", err);
+    //     message.error("Layk bosilmadi");
+    //   });
   }
 
   function deleteFavorite(id) {

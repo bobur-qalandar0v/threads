@@ -17,6 +17,7 @@ import StatisticsIcon from "../../../assets/icons/StatisticsIcon";
 import { Backend } from "../../../api";
 import { Link, useLocation } from "react-router-dom";
 import { baseURL } from "../../../constants/urls";
+import { message } from "antd";
 
 function ProfilePosts() {
   const videoRefs = useRef([]);
@@ -32,11 +33,21 @@ function ProfilePosts() {
   const [mutedStates, setMutedStates] = useState({});
   const [timeLeft, setTimeLeft] = useState({});
   const [myPosts, setMyPosts] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const getMyPosts = () => {
-    Backend.get(`${userLocalData?.username}`).then((res) => {
-      setMyPosts(res.data.posts);
-    });
+    setLoading(true);
+    Backend.get(`${userLocalData?.username}`)
+      .then((res) => {
+        setMyPosts(res.data.posts);
+      })
+      .catch((err) => {
+        console.error(err);
+        message.error("Xatolik");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   const location = useLocation();
@@ -79,12 +90,15 @@ function ProfilePosts() {
   };
 
   const handleFavorite = (data) => {
+    const isLiked = favorite.some((item) => item.uid === data.uid);
+    const updatedLikesCount = isLiked
+      ? Math.max(0, data.likes_count - 1)
+      : data.likes_count + 1;
+
     setAnimatedCounts((prev) => ({
       ...prev,
-      [data.id]: {
-        value: favorite.some((item) => item.id === data.id)
-          ? Math.max(0, data.actions[0].likeCount - 1)
-          : data.actions[0].likeCount + 1,
+      [data.uid]: {
+        value: updatedLikesCount,
         animate: true,
       },
     }));
@@ -92,14 +106,16 @@ function ProfilePosts() {
     setTimeout(() => {
       setAnimatedCounts((prev) => ({
         ...prev,
-        [data.id]: {
-          ...prev[data.id],
+        [data.uid]: {
+          ...prev[data.uid],
           animate: false,
         },
       }));
     }, 600);
 
-    addFavorites(data);
+    // Shu yerda data object’ni yangilab, addFavorites ga yuboramiz
+    const updatedData = { ...data, likes_count: updatedLikesCount };
+    addFavorites(updatedData, isLiked); // yangi like soni bor
   };
 
   const handleMute = (postIndex, videoIndex) => {
@@ -154,7 +170,11 @@ function ProfilePosts() {
     getMyPosts();
   }, []);
 
-  return (
+  return loading ? (
+    <div className="loader__wrap">
+      <div className="loader"></div>
+    </div>
+  ) : (
     <div className="posts" ref={profileMainRef}>
       <div className="posts__publish">
         <img

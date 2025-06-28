@@ -125,7 +125,7 @@ function ProfilePage() {
               <div className="center__wrap">
                 <div className="tabs">
                   <NavLink
-                    to={`/${userLocalData?.username}`}
+                    to={`/@${userLocalData?.username}`}
                     end
                     className={`links ${(isActive) =>
                       isActive ? "active" : ""}`}
@@ -135,13 +135,13 @@ function ProfilePage() {
                   <NavLink
                     className={`links ${(isActive) =>
                       isActive ? "active" : ""}`}
-                    to={`/${userLocalData?.username}/replies`}
+                    to={`/@${userLocalData?.username}/replies`}
                     end
                   >
                     Ответы
                   </NavLink>
                   <NavLink
-                    to={`/${userLocalData?.username}/media`}
+                    to={`/@${userLocalData?.username}/media`}
                     end
                     className={`links ${(isActive) =>
                       isActive ? "active" : ""}`}
@@ -149,7 +149,7 @@ function ProfilePage() {
                     Медиафайлы
                   </NavLink>
                   <NavLink
-                    to={`/${userLocalData?.username}/reposts`}
+                    to={`/@${userLocalData?.username}/reposts`}
                     end
                     className={`links ${(isActive) =>
                       isActive ? "active" : ""}`}
