@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import { API } from "../api";
+import { API, Backend } from "../api";
 import { urls } from "../constants/urls";
 
 export const AuthContext = createContext(null);
@@ -26,7 +26,8 @@ export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState(localAccessToken);
   const [isAuth, setIsAuth] = useState(false);
   const [userId, setUserId] = useState(localUser);
-  const [userInfo, setUserInfo] = useState([]);
+  const [myProfile, setMyProfile] = useState([]);
+  const [myPosts, setMyPosts] = useState([]);
   const [userLocalData, setUserLocalData] = useState(localUserData);
 
   const setUserToken = (refresh_token, access_token) => {
@@ -46,21 +47,23 @@ export const AuthProvider = ({ children }) => {
     setUserId(data);
   };
 
-  const getUserData = async () => {
-    try {
-      setLoading(true);
-      API.get(`${urls.auth.user}/${userId}`).then((res) =>
-        setUserInfo(res.data)
-      );
-    } catch (error) {
-      console.error("Xatolik:", error);
-    } finally {
-      setLoading(false);
+  const getMyProfile = async () => {
+    if (accessToken && refreshToken) {
+      try {
+        setLoading(true);
+        const res = await Backend.get(`/${userLocalData?.username}`);
+        setMyProfile(res.data);
+        setMyPosts(res.data.posts);
+      } catch (err) {
+        console.error("Xatolik:", err);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    getUserData();
+    getMyProfile();
   }, []);
 
   return (
@@ -71,13 +74,15 @@ export const AuthProvider = ({ children }) => {
         loading,
         refreshToken,
         accessToken,
-        userInfo,
         userLocalData,
+        myProfile,
+        myPosts,
+        getMyProfile,
+        setMyPosts,
+        setMyProfile,
         setIsAuth,
         setUserToken,
         setUserData,
-        getUserData,
-        setUserInfo,
         setAccessToken,
         setUserLocalData,
         setLocalUserInfo,

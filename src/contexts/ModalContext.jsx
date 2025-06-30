@@ -47,11 +47,6 @@ export const ModalProvider = ({ children }) => {
 
   const showLoading = () => {
     setOpenModal(true);
-    setLoading(true);
-
-    setTimeout(() => {
-      setLoading(false);
-    }, 0);
   };
 
   const showEditModal = () => {
@@ -60,7 +55,7 @@ export const ModalProvider = ({ children }) => {
 
     setTimeout(() => {
       setLoading(false);
-    }, 300);
+    }, 0);
   };
 
   const handleCancel = () => {

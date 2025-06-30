@@ -25,7 +25,6 @@ function SignUp() {
         if (res.status == 201) {
           setUserToken(res.data?.refresh, res.data?.access);
           setLocalUserInfo(res.data.user);
-          console.log(res);
           navigate("/");
           message.success(res.data?.message);
         }

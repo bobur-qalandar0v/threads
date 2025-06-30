@@ -166,19 +166,33 @@
   }
 
   .media__wrap {
-    padding-left: 100px;
-    padding-right: 60px;
-    margin-left: -100px;
-    border-radius: 8px;
+    // padding-left: 100px;
+    // padding-right: 60px;
+    // margin-left: -100px;
+    // border-radius: 8px;
     margin-top: 15px;
     display: flex;
     align-items: start;
     justify-content: start;
     gap: 8px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: none;
-    width: 700px;
+    // overflow-x: auto;
+    // overflow-y: hidden;
+    // cursor: grab;
+    // scrollbar-width: none;
+    // width: 700px;
+    // scroll-behavior: smooth;
+
+    // &.active {
+    //   cursor: grabbing;
+    // }
+
+    // &::-webkit-scrollbar {
+    //   display: none;
+    // }
+  }
+
+  .swiper-wrapper {
+    display: flex;
   }
 
   .volume__muted-btn {

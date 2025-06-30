@@ -9,95 +9,44 @@ import ShareIcon from "../../../assets/icons/ShareIcon";
 import VolumeIcon from "../../../assets/icons/VolumeIcon";
 import VolumeMutedIcon from "../../../assets/icons/VolumeMutedIcon";
 import SaveIcon from "../../../assets/icons/SaveIcon";
-import NotInterestingIcon from "../../../assets/icons/NotInterestingIcon";
-import BlokIcon from "../../../assets/icons/BlokIcon";
-import ComplainIcon from "../../../assets/icons/ComplainIcon";
 import LinkCopyIcon from "../../../assets/icons/LinkCopyIcon";
 import StatisticsIcon from "../../../assets/icons/StatisticsIcon";
-import { Backend } from "../../../api";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { baseURL } from "../../../constants/urls";
-import { message } from "antd";
+import DeleteIcon from "../../../assets/icons/DeleteIcon";
 
 function ProfilePosts() {
   const videoRefs = useRef([]);
   const menuRef = useRef(null);
   const profileMainRef = useRef(null);
+  const location = useLocation();
 
   const { showLoading } = useContext(ModalContext);
-  const { userLocalData } = useContext(AuthContext);
+  const { myProfile, myPosts, loading } = useContext(AuthContext);
   const { addFavorites, favorite } = useContext(FavoriteContext);
 
+  const [showEditOptions, setShowEditOptions] = useState({});
   const [animatedCounts, setAnimatedCounts] = useState({});
   const [activePostId, setActivePostId] = useState(null);
   const [mutedStates, setMutedStates] = useState({});
   const [timeLeft, setTimeLeft] = useState({});
-  const [myPosts, setMyPosts] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  const getMyPosts = () => {
-    setLoading(true);
-    Backend.get(`${userLocalData?.username}`)
-      .then((res) => {
-        setMyPosts(res.data.posts);
-      })
-      .catch((err) => {
-        console.error(err);
-        message.error("Xatolik");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
-
-  const location = useLocation();
-
-  // Har bir post uchun qolgan vaqtni hisoblash
-  const calculateTimeLeft = () => {
-    const newTimeLeft = {};
-    myPosts.forEach((post) => {
-      if (post.createdAt) {
-        const postTime = new Date(post.createdAt);
-        const currentTime = new Date();
-        const diffInMilliseconds = currentTime - postTime;
-        const minutesLeft = 15 - Math.floor(diffInMilliseconds / (1000 * 60));
-        const secondsLeft = 60 - Math.floor((diffInMilliseconds / 1000) % 60);
-
-        newTimeLeft[post.id] = {
-          minutes: Math.max(0, minutesLeft),
-          seconds: minutesLeft >= 0 ? secondsLeft : 0,
-        };
-      }
-    });
-    setTimeLeft(newTimeLeft);
-  };
-
-  useEffect(() => {
-    calculateTimeLeft();
-
-    // Har sekundda yangilash (aniqroq hisoblash uchun)
-    const timer = setInterval(calculateTimeLeft, 1000);
-
-    return () => clearInterval(timer);
-  }, [myPosts]);
-
-  const handleInfoModal = (data) => {
-    setActivePostId(data);
-  };
 
   const openModal = () => {
     showLoading();
   };
+  const handleInfoModal = (postId) => {
+    setActivePostId(activePostId === postId ? null : postId);
+  };
 
-  const handleFavorite = (data) => {
-    const isLiked = favorite.some((item) => item.uid === data.uid);
+  const handleFavorite = (post) => {
+    const isLiked = favorite.some((item) => item.uid === post.uid);
     const updatedLikesCount = isLiked
-      ? Math.max(0, data.likes_count - 1)
-      : data.likes_count + 1;
+      ? post.likes_count - 1
+      : post.likes_count + 1;
 
     setAnimatedCounts((prev) => ({
       ...prev,
-      [data.uid]: {
+      [post.uid]: {
         value: updatedLikesCount,
         animate: true,
       },
@@ -106,28 +55,60 @@ function ProfilePosts() {
     setTimeout(() => {
       setAnimatedCounts((prev) => ({
         ...prev,
-        [data.uid]: {
-          ...prev[data.uid],
+        [post.uid]: {
+          ...prev[post.uid],
           animate: false,
         },
       }));
     }, 600);
 
-    // Shu yerda data object’ni yangilab, addFavorites ga yuboramiz
-    const updatedData = { ...data, likes_count: updatedLikesCount };
-    addFavorites(updatedData, isLiked); // yangi like soni bor
+    addFavorites({ ...post, likes_count: updatedLikesCount }, isLiked);
   };
 
   const handleMute = (postIndex, videoIndex) => {
-    const clickedKey = `${postIndex}-${videoIndex}`;
-    const updatedStates = {};
+    const key = `${postIndex}-${videoIndex}`;
+    setMutedStates((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
 
-    Object.keys(mutedStates).forEach((key) => {
-      updatedStates[key] = key === clickedKey ? !mutedStates[key] : true;
+  // Vaqtni hisoblash va edit imkoniyatini yangilash
+  const updateTimers = () => {
+    const newTimeLeft = {};
+    const newShowEditOptions = {};
+
+    myPosts?.forEach((post) => {
+      if (post.created_at) {
+        const postDate = new Date(post.created_at);
+        const now = new Date();
+        const diffMs = now - postDate;
+        const diffMins = Math.floor(diffMs / (1000 * 60));
+
+        // 15 daqiqadan kam vaqt qolganligini hisoblash
+        const minsLeft = Math.max(0, 15 - diffMins);
+        const secsLeft =
+          minsLeft > 0 ? 59 - Math.floor((diffMs / 1000) % 60) : 0;
+
+        newTimeLeft[post.uid] = {
+          mins: minsLeft,
+          secs: secsLeft,
+        };
+
+        // 15 daqiqadan o'tmagan postlar uchun edit imkoniyati
+        newShowEditOptions[post.uid] = diffMins < 15;
+      }
     });
 
-    setMutedStates(updatedStates);
+    setTimeLeft(newTimeLeft);
+    setShowEditOptions(newShowEditOptions);
   };
+
+  useEffect(() => {
+    updateTimers();
+    const timerInterval = setInterval(updateTimers, 1000);
+    return () => clearInterval(timerInterval);
+  }, [myPosts]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -155,7 +136,7 @@ function ProfilePosts() {
 
   useEffect(() => {
     const newStates = {};
-    myPosts.forEach((pItem, pIndex) => {
+    myPosts?.forEach((pItem, pIndex) => {
       pItem?.videos?.forEach((_, vIndex) => {
         const key = `${pIndex}-${vIndex}`;
         newStates[key] = true;
@@ -166,9 +147,61 @@ function ProfilePosts() {
 
   // console.log(myPosts);
 
-  useEffect(() => {
-    getMyPosts();
-  }, []);
+  const renderPostMenu = (post) => {
+    const canEdit = showEditOptions[post.uid] ?? false;
+    const timeRemaining = timeLeft[post.uid] || { mins: 0, secs: 0 };
+
+    return (
+      <div className="post__menu-modal" ref={menuRef}>
+        <ul className="post__menu-list">
+          <div className="post__menu-list-wrap statistic">
+            <li className="this__other">
+              <span>Статистика</span>
+              <StatisticsIcon />
+            </li>
+          </div>
+          {canEdit ? <div className="line"></div> : null}
+
+          {canEdit && (
+            <>
+              <div className="post__menu-list-wrap edit">
+                <li className="this__other">
+                  <span>Редактировать</span>
+                  <span className="edit-timer">
+                    {timeRemaining.mins}:{timeRemaining.secs < 10 ? "0" : ""}
+                    {timeRemaining.secs}
+                  </span>
+                </li>
+              </div>
+            </>
+          )}
+
+          <div className="post__menu-list-wrap save">
+            <li className="this__other">
+              <span>Сохранить</span>
+              <SaveIcon />
+            </li>
+          </div>
+          <div className="line"></div>
+
+          <div className="post__menu-list-wrap delete">
+            <li className="shikoyat">
+              <span>Удалить</span>
+              <DeleteIcon />
+            </li>
+          </div>
+          <div className="line"></div>
+
+          <div className="post__menu-list-wrap copy">
+            <li className="this__other">
+              <span>Копировать ссылку</span>
+              <LinkCopyIcon />
+            </li>
+          </div>
+        </ul>
+      </div>
+    );
+  };
 
   return loading ? (
     <div className="loader__wrap">
@@ -182,9 +215,9 @@ function ProfilePosts() {
           height={45}
           style={{ borderRadius: "24px" }}
           src={
-            userLocalData?.photo === null
+            myProfile?.photo === null
               ? "https://www.instagram.com/static/images/text_app/profile_picture/profile_pic.png/72f3228a91ee.png"
-              : userLocalData?.photo
+              : myProfile?.photo
           }
           alt="profile-img"
         />
@@ -208,9 +241,9 @@ function ProfilePosts() {
                     height={40}
                     style={{ borderRadius: "24px" }}
                     src={
-                      userLocalData?.photo === null
+                      myProfile?.photo === null
                         ? "https://www.instagram.com/static/images/text_app/profile_picture/profile_pic.png/72f3228a91ee.png"
-                        : userLocalData?.photo
+                        : myProfile?.photo
                     }
                     alt="img"
                   />
@@ -227,50 +260,9 @@ function ProfilePosts() {
                       </span>
                     </button>
                   </div>
-                  {activePostId === item?.uid && (
-                    <div className="post__menu-modal" ref={menuRef}>
-                      <ul className="post__menu-list">
-                        <li className="this__other">
-                          <span>Статистика</span>
-                          <StatisticsIcon />
-                        </li>
-                        <span className="line"></span>
 
-                        <li className="this__other">
-                          <span>Редактировать</span>
-                        </li>
+                  {activePostId === item?.uid && renderPostMenu(item)}
 
-                        <li className="this__other">
-                          <span>Сохранить</span>
-                          <SaveIcon />
-                        </li>
-                        <li
-                          className="this__other"
-                          style={{ marginBottom: "8px" }}
-                        >
-                          <span>Не интересует</span>
-                          <NotInterestingIcon />
-                        </li>
-                        <span className="line"></span>
-                        <li className="other">
-                          <span>Заблокировать</span>
-                          <BlokIcon />
-                        </li>
-                        <li className="shikoyat">
-                          <span>Пожаловаться</span>
-                          <ComplainIcon />
-                        </li>
-                        <span className="line"></span>
-                        <li
-                          className="this__other"
-                          style={{ marginTop: "16px" }}
-                        >
-                          <span>Копировать ссылку</span>
-                          <LinkCopyIcon />
-                        </li>
-                      </ul>
-                    </div>
-                  )}
                   {item?.content && (
                     <p className="post__text">{item?.content}</p>
                   )}

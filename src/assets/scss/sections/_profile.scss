@@ -286,28 +286,48 @@
 
   .post__menu-list {
     position: relative;
-    padding: 8px;
     list-style: none;
+    width: 100%;
 
-    > li {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 16px;
-      padding: 14px;
-      cursor: pointer;
-      border-radius: 8px;
-      transition: all 0.1s ease-in-out;
+    .statistic {
+      padding: 8px;
+    }
 
-      &:hover {
-        background-color: rgba(255, 255, 255, 0.04);
+    .edit {
+      padding: 8px 8px 0 8px;
+    }
+
+    .save {
+      padding: 0px 8px 8px 8px;
+    }
+
+    .delete {
+      padding: 8px;
+    }
+
+    .copy{
+      padding: 8px;
+    }
+
+    &-wrap {
+      > li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 16px;
+        padding: 14px;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all 0.1s ease-in-out;
+
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.04);
+        }
       }
     }
 
     .line {
       width: 100%;
-      position: absolute;
-      left: 0;
       height: 1px;
       background-color: rgba(243, 245, 247, 0.15);
     }
@@ -324,7 +344,6 @@
 
   .shikoyat {
     color: rgba(255, 48, 64, 1);
-    margin-bottom: 8px;
   }
 
   .dots__menu {

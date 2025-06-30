@@ -23,29 +23,6 @@ export function FavoriteProvider({ children }) {
     setFavorite(data);
   }
 
-  // function addFavorites(data) {
-  //   const isLiked = favorite.some((item) => item.id === data.id);
-
-  //   const updatedActions = {
-  //     ...data.actions[0],
-  //     likeCount: isLiked
-  //       ? Math.max(0, data.actions[0].likeCount - 1)
-  //       : data.actions[0].likeCount + 1,
-  //   };
-
-  //   if (isLiked) {
-  //     setLocalFavorite(favorite.filter((item) => item.id !== data.id));
-  //   } else {
-  //     setLocalFavorite([...favorite, data]);
-  //   }
-
-  //   API.patch(`${urls.user_post.patch}/${data.id}`, {
-  //     actions: [updatedActions],
-  //   }).then((res) => {
-  //     getHandleLike();
-  //   });
-  // }
-
   function addFavorites(updatedData, isLiked) {
     // LocalStorage favoritni yangilash
     if (isLiked) {

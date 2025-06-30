@@ -4,7 +4,7 @@ import DraftIcon from "./assets/icons/DraftIcon";
 import ModalMoreIcon from "./assets/icons/ModalMoreIcon";
 import ImgIcon from "./assets/icons/ImgIcon";
 import Xicon from "./assets/icons/Xicon";
-import { API, Backend } from "./api";
+import { Backend } from "./api";
 import { backendurls, urls } from "./constants/urls";
 import { message } from "antd";
 import { AuthContext } from "./contexts/AuthContext";
@@ -12,7 +12,7 @@ import { AuthContext } from "./contexts/AuthContext";
 function ModalComponent() {
   const { openModal, handleCancel, loading, getPosts } =
     useContext(ModalContext);
-  const { accessToken, userLocalData } = useContext(AuthContext);
+  const { accessToken, myProfile } = useContext(AuthContext);
   const [value, setValue] = useState("");
   const [isPublishing, setIsPublishing] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -28,9 +28,8 @@ function ModalComponent() {
       const formData = new FormData();
       formData.append("content", value);
 
-      // Agar fayllar tanlangan bo‘lsa, ularni qo‘shamiz
       selectedFiles.forEach((fileObj) => {
-        formData.append("media", fileObj.file); // kalit bir xil bo'lishi kerak
+        formData.append("media", fileObj.file);
       });
 
       const response = await Backend.post(
@@ -65,7 +64,6 @@ function ModalComponent() {
     }
   }, [value]);
 
-  // Fayl tanlanganda preview qilish
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
 
@@ -124,15 +122,15 @@ function ModalComponent() {
                     width={50}
                     height={50}
                     src={
-                      userLocalData?.photo === null
+                      myProfile?.photo === null
                         ? "https://www.instagram.com/static/images/text_app/profile_picture/profile_pic.png/72f3228a91ee.png"
-                        : userLocalData?.photo
+                        : myProfile?.photo
                     }
                     alt="user-img"
                     style={{ borderRadius: "24px" }}
                   />
                   <div style={{ flex: 1 }}>
-                    <p className="username">{userLocalData?.username}</p>
+                    <p className="username">{myProfile?.username}</p>
                     <textarea
                       className="textarea"
                       ref={textareaRef}

@@ -3,8 +3,8 @@ import { ModalContext } from "./contexts/ModalContext";
 import { AuthContext } from "./contexts/AuthContext";
 import { Button, Form, Input, message } from "antd";
 import EmptyUserImg from "./assets/icons/EmptyUserImg";
-import { API } from "./api";
-import { urls } from "./constants/urls";
+import { Backend } from "./api";
+import { backendurls } from "./constants/urls";
 
 function EditProfileModal() {
   const [form] = Form.useForm();
@@ -15,18 +15,18 @@ function EditProfileModal() {
 
   const { editModal, loading, setEditModal } = useContext(ModalContext);
 
-  const { userInfo, userId, getUserData } = useContext(AuthContext);
+  const { getMyProfile, myProfile, accessToken } = useContext(AuthContext);
 
   useEffect(() => {
-    if (userInfo?.profile_img) {
+    if (myProfile?.photo !== null) {
       setSelectedImage([
         {
           file: null,
-          url: userInfo?.profile_img,
+          url: myProfile?.photo,
         },
       ]);
     }
-  }, [userInfo]);
+  }, [myProfile]);
 
   // const [value, setValue] = useState("");
   const [isPublishing, setIsPublishing] = useState(false);
@@ -34,57 +34,39 @@ function EditProfileModal() {
   const [changeImage, setChangeImage] = useState(false);
 
   const [selectedImage, setSelectedImage] = useState([
-    { file: null, url: `${userInfo?.profile_img}` },
+    { file: null, url: `${myProfile?.photo}` },
   ]);
 
   const handleSave = async (data) => {
     try {
-      let profile_img_url = selectedImage[0]?.url;
-
       setIsPublishing(true);
+
       const formData = new FormData();
 
+      formData.append("fullname", data.fullname);
+      formData.append("username", data.username);
+      formData.append("bio", data.bio || "");
+      formData.append("link", data.link || "");
+
+      // Agar rasm o'zgartirilgan bo‘lsa va file mavjud bo‘lsa
       if (selectedImage[0]?.file) {
-        formData.append("file", selectedImage[0]?.file);
-        formData.append("is_profile", "true");
-
-        const res = await fetch("http://localhost:5000/upload-profile", {
-          method: "POST",
-          body: formData,
-        });
-
-        const result = await res.json();
-
-        if (result?.media_url) {
-          profile_img_url = result?.media_url;
-        } else {
-          message.error("Rasm yuklashda xatolik");
-          return;
-        }
+        formData.append("photo", selectedImage[0].file);
+      } else if (selectedImage[0].url === "") {
+        formData.append("photo", "");
       }
 
-      const payload = {
-        name_and_surname: data?.name_and_surname,
-        username: data?.username,
-        profile_img: profile_img_url,
-        user_bio: data?.user_bio,
-        user_url: data?.user_url,
-      };
-
-      API.patch(`${urls.auth.user}/${userId}`, payload).then((res) => {
-        if (res.status === 200) {
-          setSelectedImage([
-            {
-              file: null,
-              url: res.data?.profile_img,
-            },
-          ]);
-          getUserData();
-          setChangeImage(false);
-          setEditModal(false);
-          message.success("Saqlandi!");
-        }
+      const res = await Backend.patch(`${myProfile?.username}`, formData, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "multipart/form-data",
+        },
       });
+
+      if (res.status === 200 || res.status === 201) {
+        message.success("Profil yangilandi!");
+        setEditModal(false);
+        getMyProfile();
+      }
     } catch (err) {
       console.error(err);
       message.error("Saqlashda xatolik yuz berdi!");
@@ -110,7 +92,6 @@ function EditProfileModal() {
         url: "",
       },
     ]);
-    getUserData();
     setChangeImage(false);
     setEditModal(false);
   };
@@ -158,15 +139,15 @@ function EditProfileModal() {
   }, [changeImage]);
 
   useEffect(() => {
-    if (userInfo && Object.keys(userInfo).length > 0) {
+    if (myProfile && Object.keys(myProfile).length > 0) {
       form.setFieldsValue({
-        name_and_surname: userInfo?.name_and_surname || "",
-        username: userInfo?.username || "",
-        user_bio: userInfo?.user_bio || "",
-        user_url: userInfo?.user_url || "",
+        fullname: myProfile?.fullname || "",
+        username: myProfile?.username || "",
+        bio: myProfile?.bio || "",
+        link: myProfile?.link || "",
       });
     }
-  }, [editModal, userInfo, form]);
+  }, [editModal, myProfile, form]);
 
   // useEffect(() => {
   //   const textarea = textareaRef.current;
@@ -200,7 +181,7 @@ function EditProfileModal() {
                   <h3 className="title">Имя</h3>
                   <Form.Item
                     className="form-item"
-                    name="name_and_surname"
+                    name="fullname"
                     rules={[
                       {
                         required: true,
@@ -217,105 +198,57 @@ function EditProfileModal() {
                   <p className="line"></p>
                 </div>
                 <div className="img__wrap">
-                  {
-                    selectedImage[0]?.url === "undefined" ||
-                    selectedImage[0]?.url === "" ||
-                    selectedImage.length === 0 ? (
-                      <label style={{ cursor: "pointer" }}>
-                        <div
-                          style={{
-                            width: "55px",
-                            height: "55px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            background: "rgb(30,30,30)",
-                            borderRadius: "50%",
-                          }}
-                        >
-                          <EmptyUserImg />
-                        </div>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageChange}
-                          style={{ display: "none" }}
-                        />
-                      </label>
-                    ) : (
+                  {selectedImage[0]?.url === undefined ||
+                  selectedImage[0]?.url === "" ||
+                  selectedImage[0]?.url === "null" ||
+                  selectedImage[0]?.url === null ? (
+                    <label style={{ cursor: "pointer" }}>
                       <div
                         style={{
+                          width: "55px",
+                          height: "55px",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
+                          background: "rgb(30,30,30)",
+                          borderRadius: "50%",
                         }}
                       >
-                        <div
-                          style={{ cursor: "pointer" }}
-                          onClick={() => setChangeImage(true)}
-                        >
-                          <img
-                            style={{
-                              width: "55px",
-                              height: "55px",
-                              borderRadius: "50%",
-                              objectFit: "cover",
-                            }}
-                            src={selectedImage[0]?.url}
-                            alt="img"
-                          />
-                        </div>
+                        <EmptyUserImg />
                       </div>
-                    )
-                    // ) : selectedImage[0]?.url ? (
-                    //   <div
-                    //     style={{
-                    //       display: "flex",
-                    //       alignItems: "center",
-                    //       justifyContent: "center",
-                    //     }}
-                    //   >
-                    //     <div
-                    //       style={{ cursor: "pointer" }}
-                    //       onClick={() => setChangeImage(true)}
-                    //     >
-                    //       <img
-                    //         style={{
-                    //           width: "55px",
-                    //           height: "55px",
-                    //           borderRadius: "50%",
-                    //           objectFit: "cover",
-                    //         }}
-                    //         src={selectedImage[0]?.url}
-                    //         alt="img"
-                    //       />
-                    //     </div>
-                    //   </div>
-                    // ) : (
-                    //   <div
-                    //     style={{
-                    //       display: "flex",
-                    //       alignItems: "center",
-                    //       justifyContent: "center",
-                    //     }}
-                    //   >
-                    //     <div
-                    //       style={{ cursor: "pointer" }}
-                    //       onClick={() => setChangeImage(true)}
-                    //     >
-                    //       <img
-                    //         style={{
-                    //           width: "55px",
-                    //           height: "55px",
-                    //           borderRadius: "50%",
-                    //           objectFit: "cover",
-                    //         }}
-                    //         src={userInfo?.profile_img}
-                    //         alt="img"
-                    //       />
-                    //     </div>
-                    //   </div>
-                  }
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        style={{ display: "none" }}
+                      />
+                    </label>
+                  ) : (
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <div
+                        style={{ cursor: "pointer" }}
+                        onClick={() => setChangeImage(true)}
+                      >
+                        <img
+                          style={{
+                            width: "55px",
+                            height: "55px",
+                            borderRadius: "50%",
+                            objectFit: "cover",
+                          }}
+                          src={selectedImage[0]?.url}
+                          alt="img"
+                          loading="lazy"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -359,7 +292,7 @@ function EditProfileModal() {
               </div>
               <div className="custom__bio">
                 <h3 className="title">Биография</h3>
-                <Form.Item className="form-item" name="user_bio">
+                <Form.Item className="form-item" name="bio">
                   <Input
                     className="form-input"
                     type="text"
@@ -372,7 +305,7 @@ function EditProfileModal() {
               </div>
               <div className="custom__link">
                 <h3 className="title">Ссылки</h3>
-                <Form.Item className="form-item" name="user_url">
+                <Form.Item className="form-item" name="link">
                   <Input
                     className="form-input"
                     type="url"
