@@ -46,7 +46,7 @@
   .form {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 25px;
   }
 
   .form__item {
@@ -125,6 +125,16 @@
     -webkit-box-shadow: none !important;
     -webkit-text-fill-color: white !important;
     transition: background-color 5000s ease-in-out 0s;
+  }
+
+  .ant-form-item-explain-error {
+    width: 300px;
+    position: absolute;
+    top: 55px;
+    left: 10px;
+    display: flex;
+    align-items: start;
+    justify-content: start;
   }
 
   .ant-input {

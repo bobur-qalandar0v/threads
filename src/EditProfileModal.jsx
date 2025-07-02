@@ -4,7 +4,6 @@ import { AuthContext } from "./contexts/AuthContext";
 import { Button, Form, Input, message } from "antd";
 import EmptyUserImg from "./assets/icons/EmptyUserImg";
 import { Backend } from "./api";
-import { backendurls } from "./constants/urls";
 
 function EditProfileModal() {
   const [form] = Form.useForm();

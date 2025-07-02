@@ -1,9 +1,8 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import InsightsIcon from "../../assets/icons/InsigthsIcon";
 import { AuthContext } from "../../contexts/AuthContext";
 import { Link, NavLink, Outlet } from "react-router-dom";
 import { ModalContext } from "../../contexts/ModalContext";
-import { Backend } from "../../api";
 
 function ProfilePage() {
   const { loading, myProfile } = useContext(AuthContext);

@@ -25,6 +25,7 @@ export const ModalProvider = ({ children }) => {
       .then((res) => {
         setPost(res.data);
         setMuted(res.data.map(() => true));
+        // console.log(res);
       })
       .catch((err) => {
         message.error("Xatolik");

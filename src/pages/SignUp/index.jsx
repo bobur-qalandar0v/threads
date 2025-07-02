@@ -18,20 +18,62 @@ function SignUp() {
 
   const [loading, setLoading] = useState(false);
 
+  const checkUsernameAvailability = async (username) => {
+    try {
+      const formData = new FormData();
+      formData.append("username", username);
+      const response = await Backend.post("/check/username", formData);
+
+      return response.data.available;
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
+  };
+
+  const checkEmailAvailability = async (email) => {
+    try {
+      const formData = new FormData();
+      formData.append("email", email);
+      const response = await Backend.post("/check/email", formData);
+
+      return response.data.available;
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
+  };
+
+  const checkPhoneAvailability = async (phone) => {
+    try {
+      const formData = new FormData();
+      formData.append("phone", phone);
+      const response = await Backend.post("/check/phone", formData);
+
+      return response.data.available;
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
+  };
+
   const SignUp = (data) => {
     setLoading(true);
     Backend.post(`${backendurls.auth.register}`, data)
       .then((res) => {
         if (res.status == 201) {
           setUserToken(res.data?.refresh, res.data?.access);
-          setLocalUserInfo(res.data.user);
+          setLocalUserInfo(res.data?.user);
           navigate("/");
           message.success(res.data?.message);
+          window.location.reload();
         }
       })
       .catch((err) => {
         if (err.status === 500) {
           message.error("Tizimda xatolik");
+        } else {
+          console.error(err);
         }
       })
       .finally(() => {
@@ -42,17 +84,9 @@ function SignUp() {
   const onFinish = (values) => {
     const payload = {
       ...values,
-      phone:
-        values?.phone?.slice(0, 4) +
-        "" +
-        values?.phone?.slice(5, 7) +
-        "" +
-        values?.phone?.slice(8, 11) +
-        "" +
-        values?.phone?.slice(12, 14) +
-        "" +
-        values?.phone?.slice(15, 17),
+      phone: values?.phone?.replace(/\D/g, ""),
     };
+
     SignUp(payload);
   };
 
@@ -106,6 +140,29 @@ function SignUp() {
                         required: true,
                         message: "",
                       },
+                      {
+                        validator: async (_, value) => {
+                          if (value) {
+                            try {
+                              const formattedPhone = value.replace(/\D/g, "");
+                              const isAvailable = await checkPhoneAvailability(
+                                formattedPhone
+                              );
+                              if (!isAvailable) {
+                                return Promise.reject(
+                                  new Error("Bu telefon raqami band!")
+                                );
+                              }
+                            } catch (err) {
+                              console.log("Telefon tekshirishda xato!", err);
+                              return Promise.reject(
+                                new Error("Telefon raqamni tekshirib bolmadi")
+                              );
+                            }
+                          }
+                          return Promise.resolve();
+                        },
+                      },
                     ]}
                   >
                     <InputTel />
@@ -121,6 +178,20 @@ function SignUp() {
                       {
                         required: true,
                         message: "",
+                      },
+                      {
+                        validator: async (_, value) => {
+                          if (!value) {
+                            return Promise.resolve();
+                          }
+                          const isAvailable = await checkEmailAvailability(
+                            value
+                          );
+                          if (!isAvailable) {
+                            return Promise.reject(new Error("Bu email band!"));
+                          }
+                          return Promise.resolve();
+                        },
                       },
                     ]}
                   >
@@ -142,11 +213,31 @@ function SignUp() {
                         required: true,
                         message: "",
                       },
+                      {
+                        validator: async (_, value) => {
+                          if (value && value.length >= 3) {
+                            const isAvailable = await checkUsernameAvailability(
+                              value
+                            );
+                            if (!isAvailable) {
+                              return Promise.reject(
+                                new Error("Bu foydalanuvchi nomi band!")
+                              );
+                            }
+                          }
+                          return Promise.resolve();
+                        },
+                      },
                     ]}
                   >
                     <Input
                       className="input-field"
                       placeholder="Foydalanuvchi nomi"
+                      onBlur={(e) => {
+                        if (e.target.value) {
+                          checkUsernameAvailability(e.target.value);
+                        }
+                      }}
                     />
                   </Form.Item>
                 </div>

@@ -424,16 +424,16 @@ import NotInterestingIcon from "../../assets/icons/NotInterestingIcon";
 import BlokIcon from "../../assets/icons/BlokIcon";
 import LinkCopyIcon from "../../assets/icons/LinkCopyIcon";
 import ComplainIcon from "../../assets/icons/ComplainIcon";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/AuthContext";
-
-// Swiper imports
 import { Swiper, SwiperSlide } from "swiper/react";
 import SwiperCore from "swiper";
 import { FreeMode } from "swiper/modules";
 import "swiper/css/free-mode";
 import VolumeMutedIcon from "../../assets/icons/VolumeMutedIcon";
 import VolumeIcon from "../../assets/icons/VolumeIcon";
+import { Backend } from "../../api";
+import { formatDistanceToNow } from "date-fns";
 SwiperCore.use([FreeMode]);
 
 function DashboardPage() {
@@ -441,11 +441,11 @@ function DashboardPage() {
   const menuRef = useRef(null);
   const dashboardMainRef = useRef(null);
 
+  const navigate = useNavigate();
+
   const { showLoading, post, getPosts, loading } = useContext(ModalContext);
-  const { addFavorites, favorite, setLocalFavorite } =
-    useContext(FavoriteContext);
-  const { myProfile, accessToken, refreshToken, userLocalData } =
-    useContext(AuthContext);
+  const { addFavorites, favorite } = useContext(FavoriteContext);
+  const { myProfile, accessToken, refreshToken } = useContext(AuthContext);
 
   const [animatedCounts, setAnimatedCounts] = useState({});
   const [activePostUid, setActivePostUid] = useState(null);
@@ -577,7 +577,7 @@ function DashboardPage() {
         {accessToken !== "" && refreshToken !== "" ? (
           <>
             <div className="dashboard__publish">
-              <Link to={`/${myProfile?.username}`}>
+              <Link to={`/@${myProfile?.username}`}>
                 <img
                   width={45}
                   height={45}
@@ -622,16 +622,30 @@ function DashboardPage() {
                   </div>
                   <div className="content__wrap">
                     <div className="header__wrapper">
-                      <Link
-                        to={
-                          myProfile?.username === item?.author?.username
-                            ? `/@${myProfile?.username}`
-                            : `/user/@${item?.author?.username}`
-                        }
-                        className="user__name"
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "end",
+                          gap: "8px",
+                        }}
                       >
-                        {item?.author?.username}
-                      </Link>
+                        <Link
+                          to={
+                            myProfile?.username === item?.author?.username
+                              ? `/@${myProfile?.username}`
+                              : `/user/@${item?.author?.username}`
+                          }
+                          className="user__name"
+                        >
+                          {item?.author?.username}
+                        </Link>
+                        <div style={{ color: "#717171", fontSize: "14px" }}>
+                          {" "}
+                          {formatDistanceToNow(new Date(item.created_at), {
+                            addSuffix: true,
+                          })}
+                        </div>
+                      </div>
                       <button
                         className="dots__menu"
                         onClick={() => handleInfoModal(item?.uid)}
@@ -705,12 +719,12 @@ function DashboardPage() {
                                       item?.videos?.length === 1 &&
                                       item?.images?.length === 0
                                         ? "350px"
-                                        : "260px",
+                                        : "300px",
                                     height:
                                       item?.videos?.length === 1 &&
                                       item?.images?.length === 0
                                         ? "430px"
-                                        : "320px",
+                                        : "340px",
                                     position: "relative",
                                     flexShrink: 0,
                                   }}
@@ -761,7 +775,7 @@ function DashboardPage() {
                                     item?.images?.length === 1 &&
                                     item?.videos?.length === 0
                                       ? "400px"
-                                      : "320px"
+                                      : "340px"
                                   }`,
                                 }}
                               >

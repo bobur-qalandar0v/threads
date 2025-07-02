@@ -13,10 +13,6 @@ export const AuthProvider = ({ children }) => {
     ? localStorage.getItem("access_token")
     : "";
 
-  const localUser = localStorage.getItem("UserId")
-    ? JSON.parse(localStorage.getItem("UserId"))
-    : null;
-
   const localUserData = localStorage.getItem("UserData")
     ? JSON.parse(localStorage.getItem("UserData"))
     : {};
@@ -25,7 +21,6 @@ export const AuthProvider = ({ children }) => {
   const [refreshToken, setRefreshToken] = useState(localRefreshToken);
   const [accessToken, setAccessToken] = useState(localAccessToken);
   const [isAuth, setIsAuth] = useState(false);
-  const [userId, setUserId] = useState(localUser);
   const [myProfile, setMyProfile] = useState([]);
   const [myPosts, setMyPosts] = useState([]);
   const [userLocalData, setUserLocalData] = useState(localUserData);
@@ -40,11 +35,6 @@ export const AuthProvider = ({ children }) => {
   const setLocalUserInfo = (data) => {
     localStorage.setItem("UserData", JSON.stringify(data));
     setUserLocalData(data);
-  };
-
-  const setUserData = (data) => {
-    localStorage.setItem("UserId", JSON.stringify(data));
-    setUserId(data);
   };
 
   const getMyProfile = async () => {
@@ -63,13 +53,26 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    Backend.get("/auth/check/", {
+      headers: {
+        Authorization: "Bearer " + accessToken,
+      },
+    }).then((res) => {
+      if (res.status === 401) {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        navigate("/login");
+      }
+    });
+  }, []);
+
+  useEffect(() => {
     getMyProfile();
   }, []);
 
   return (
     <AuthContext.Provider
       value={{
-        userId,
         isAuth,
         loading,
         refreshToken,
@@ -82,7 +85,6 @@ export const AuthProvider = ({ children }) => {
         setMyProfile,
         setIsAuth,
         setUserToken,
-        setUserData,
         setAccessToken,
         setUserLocalData,
         setLocalUserInfo,

@@ -3,7 +3,7 @@ import { Button, Form, Input, message } from "antd";
 import UserIcon from "../../assets/icons/UsreIcon";
 import PasswordIcon from "../../assets/icons/PasswordIcon";
 import { useNavigate } from "react-router-dom";
-import { API, Backend } from "../../api";
+import { Backend } from "../../api";
 import { backendurls, urls } from "../../constants/urls";
 import { AuthContext } from "../../contexts/AuthContext";
 
@@ -23,6 +23,7 @@ function SignIn() {
           message.success("Tizimga muvaffaiyatli kirildi");
           navigate("/");
           setLocalUserInfo(res.data?.user);
+          window.location.reload();
         } else {
           message.error("Tizimda xatolik");
         }

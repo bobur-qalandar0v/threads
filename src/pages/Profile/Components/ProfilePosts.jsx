@@ -14,6 +14,7 @@ import StatisticsIcon from "../../../assets/icons/StatisticsIcon";
 import { useLocation } from "react-router-dom";
 import { baseURL } from "../../../constants/urls";
 import DeleteIcon from "../../../assets/icons/DeleteIcon";
+import { formatDistanceToNow } from "date-fns";
 
 function ProfilePosts() {
   const videoRefs = useRef([]);
@@ -211,8 +212,8 @@ function ProfilePosts() {
     <div className="posts" ref={profileMainRef}>
       <div className="posts__publish">
         <img
-          width={45}
-          height={45}
+          width={80}
+          height={50}
           style={{ borderRadius: "24px" }}
           src={
             myProfile?.photo === null
@@ -250,7 +251,14 @@ function ProfilePosts() {
                 </div>
                 <div className="content__wrap">
                   <div className="header__wrapper">
-                    <p className="user__name">{item?.author?.username}</p>
+                    <div className="user__wrap">
+                      <p className="user__name">{item?.author?.username}</p>
+                      <div className="post__created-time">
+                        {formatDistanceToNow(new Date(item.created_at), {
+                          addSuffix: true,
+                        })}
+                      </div>
+                    </div>
                     <button
                       className="dots__menu"
                       onClick={() => handleInfoModal(item.uid)}
