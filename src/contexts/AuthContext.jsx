@@ -25,6 +25,12 @@ export const AuthProvider = ({ children }) => {
   const [userProfile, setUserProfile] = useState([]);
   const [userPosts, setUserPosts] = useState([]);
   const [userLocalData, setUserLocalData] = useState(localUserData);
+  const localUsername = localStorage.getItem("userProfile")
+    ? JSON.parse(localStorage.getItem("userProfile"))
+    : userLocalData?.username;
+
+  const [username, setUsername] = useState(localUsername);
+
   const [muted, setMuted] = useState(true);
 
   const setUserToken = (refresh_token, access_token) => {
@@ -41,15 +47,14 @@ export const AuthProvider = ({ children }) => {
 
   const getProfile = async () => {
     try {
-      setLoading(true);
-      const res = await Backend.get(`/bobur_qalandar0v`);
+      // setLoading(true);
+      const res = await Backend.get(`/${username}`);
       setUserProfile(res.data);
       setUserPosts(res.data.posts);
-      console.log(res);
     } catch (err) {
       console.error("Xatolik:", err);
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 
@@ -60,10 +65,8 @@ export const AuthProvider = ({ children }) => {
         const res = await Backend.get(`/${userLocalData?.username}`);
         setMyProfile(res.data);
         setMyPosts(res.data.posts);
-        setMuted(res.data?.posts?.map(() => true));
       } catch (err) {
         console.error("Xatolik:", err);
-        window.location.reload();
       } finally {
         setLoading(false);
       }
@@ -86,8 +89,8 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    // getMyProfile();
-    // getProfile();
+    getMyProfile();
+    getProfile();
   }, []);
 
   return (
@@ -102,6 +105,7 @@ export const AuthProvider = ({ children }) => {
         userProfile,
         userPosts,
         myPosts,
+        setUsername,
         getProfile,
         setMyPosts,
         setMyProfile,

@@ -1,22 +1,29 @@
 import React, { useContext, useEffect } from "react";
 import InsightsIcon from "../../assets/icons/InsigthsIcon";
 import { AuthContext } from "../../contexts/AuthContext";
-import { Link, NavLink, Outlet } from "react-router-dom";
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { ModalContext } from "../../contexts/ModalContext";
+import PrevIcon from "../../assets/icons/PrevIcon";
 
 function ProfilePage() {
-  const { loading, myProfile, userProfile, getProfile } =
+  const navigate = useNavigate();
+
+  const { loading, myProfile, userProfile, getProfile, setUsername } =
     useContext(AuthContext);
 
   const { showEditModal } = useContext(ModalContext);
 
-  // useEffect(() => {
-  //   if (userProfile?.username) {
-  //     getProfile({ author: { username: userProfile?.username } });
-  //   }
-  // }, [location.pathname]);
+  const handleNavigate = () => {
+    localStorage.setItem("userProfile", JSON.stringify(myProfile?.username));
+    setUsername(myProfile?.username);
+    navigate(-1);
+  };
 
-  console.log(userProfile);
+  useEffect(() => {
+    if (userProfile?.username) {
+      getProfile({ author: { username: userProfile?.username } });
+    }
+  }, [location.pathname]);
 
   return (
     <div className="profile">
@@ -166,7 +173,11 @@ function ProfilePage() {
       ) : (
         <>
           <div className="profile__header">
+            <button className="prev__btn" onClick={() => handleNavigate()}>
+              <PrevIcon />
+            </button>
             <h3 className="title">{userProfile?.username}</h3>
+            <p></p>
           </div>
           <div className="profile__main">
             {loading ? (
@@ -257,10 +268,9 @@ function ProfilePage() {
                       </div>
                     </div>
                   </div>
-                  <div className="change__btn-wrap">
-                    <button className="change__btn" onClick={showEditModal}>
-                      Редактировать профиль
-                    </button>
+                  <div className="follow__btn-wrap">
+                    <button className="follow-btn">Подписаться</button>
+                    <button className="mention-btn">Упомянуть</button>
                   </div>
                 </div>
                 <div className="profile__center">

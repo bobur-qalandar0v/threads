@@ -202,9 +202,7 @@ function ProfilePosts() {
     );
   };
 
-  {
-    // userProfile?.is_owner === false ? ;
-  }
+  // console.log(userPosts)
 
   return loading ? (
     <div className="loader__wrap">
@@ -433,9 +431,9 @@ function ProfilePosts() {
                       height={40}
                       style={{ borderRadius: "24px" }}
                       src={
-                        myProfile?.photo === null
+                        item?.author?.photo === null
                           ? "https://www.instagram.com/static/images/text_app/profile_picture/profile_pic.png/72f3228a91ee.png"
-                          : myProfile?.photo
+                          : item?.author?.photo
                       }
                       alt="img"
                     />

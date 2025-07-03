@@ -19,7 +19,7 @@
   }
 
   .card {
-    background-image: linear-gradient(163deg, #00ff75 0%, #3700ff 100%);
+    // background-image: linear-gradient(163deg, #00ff75 0%, #3700ff 100%);
     border-radius: 22px;
     transition: all 0.3s;
     width: 370px;
@@ -30,10 +30,10 @@
     border-radius: 0;
     transition: all 0.2s;
 
-    &:hover {
-      transform: scale(0.98);
-      border-radius: 20px;
-    }
+    // &:hover {
+    //   transform: scale(0.98);
+    //   border-radius: 20px;
+    // }
   }
 
   #heading {
@@ -67,11 +67,10 @@
     align-items: center;
     justify-content: start;
     height: 56px;
-    border-radius: 25px;
+    border-radius: 10px;
     border: none;
     outline: none;
-    background-color: #171717;
-    box-shadow: inset 2px 5px 10px rgb(5, 5, 5);
+    background-color: #252525;
   }
 
   .icons {

@@ -23,7 +23,7 @@ function SignIn() {
           message.success("Tizimga muvaffaiyatli kirildi");
           navigate("/");
           setLocalUserInfo(res.data?.user);
-          window.location.reload();
+          // window.location.reload();
         } else {
           message.error("Tizimda xatolik");
         }

@@ -566,9 +566,8 @@ function DashboardPage() {
   }, []);
 
   const handleProfile = (data) => {
-    console.log(data);
     localStorage.setItem("userProfile", JSON.stringify(data?.author?.username));
-    // getProfile(data);
+    setUsername(data?.author?.username);
   };
 
   return loading ? (
