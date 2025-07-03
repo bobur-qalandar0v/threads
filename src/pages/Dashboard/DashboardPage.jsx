@@ -445,7 +445,8 @@ function DashboardPage() {
 
   const { showLoading, post, getPosts, loading } = useContext(ModalContext);
   const { addFavorites, favorite } = useContext(FavoriteContext);
-  const { myProfile, accessToken, refreshToken } = useContext(AuthContext);
+  const { myProfile, getProfile, accessToken, refreshToken } =
+    useContext(AuthContext);
 
   const [animatedCounts, setAnimatedCounts] = useState({});
   const [activePostUid, setActivePostUid] = useState(null);
@@ -564,6 +565,12 @@ function DashboardPage() {
     getPosts();
   }, []);
 
+  const handleProfile = (data) => {
+    console.log(data);
+    localStorage.setItem("userProfile", JSON.stringify(data?.author?.username));
+    // getProfile(data);
+  };
+
   return loading ? (
     <div className="loader__wrap">
       <div className="loader"></div>
@@ -631,11 +638,12 @@ function DashboardPage() {
                       >
                         <Link
                           to={
-                            myProfile?.username === item?.author?.username
-                              ? `/@${myProfile?.username}`
-                              : `/user/@${item?.author?.username}`
+                            // item?.author?.username === myProfile?.username
+                            // ? `/@${myProfile?.username}`
+                            `/@${item?.author?.username}`
                           }
                           className="user__name"
+                          onClick={() => handleProfile(item)}
                         >
                           {item?.author?.username}
                         </Link>

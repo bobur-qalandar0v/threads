@@ -1,9 +1,5 @@
 import axios from "axios";
 
-export const API = axios.create({
-  baseURL: "https://5cde39e7ec452d62.mokky.dev",
-});
-
 export const Backend = axios.create({
   baseURL: "https://threadsapi-vd30.onrender.com",
 });
@@ -12,7 +8,7 @@ Backend.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("access_token");
     if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },

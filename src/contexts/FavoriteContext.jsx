@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from "react";
-import { API, Backend } from "../api";
+import { Backend } from "../api";
 import { backendurls, urls } from "../constants/urls";
 import { ModalContext } from "./ModalContext";
 import { message } from "antd";
@@ -60,7 +60,7 @@ export function FavoriteProvider({ children }) {
         console.error("Like request error:", err);
       });
 
-    // // PATCH SO'ROV
+    // PATCH SO'ROV
     // Backend.patch(`${backendurls.user_post.like}/${updatedData.uid}/like/`, {
     //   likes_count: updatedData.likes_count,
     // })

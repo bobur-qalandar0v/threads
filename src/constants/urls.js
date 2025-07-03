@@ -24,7 +24,6 @@ export const backendurls = {
 
   user_post: {
     post: "/posts/add",
-    like: "/posts",
     get: "/posts/recommended",
   },
 };

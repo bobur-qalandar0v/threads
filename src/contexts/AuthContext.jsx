@@ -1,6 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import { API, Backend } from "../api";
-import { urls } from "../constants/urls";
+import { Backend } from "../api";
 
 export const AuthContext = createContext(null);
 
@@ -23,7 +22,10 @@ export const AuthProvider = ({ children }) => {
   const [isAuth, setIsAuth] = useState(false);
   const [myProfile, setMyProfile] = useState([]);
   const [myPosts, setMyPosts] = useState([]);
+  const [userProfile, setUserProfile] = useState([]);
+  const [userPosts, setUserPosts] = useState([]);
   const [userLocalData, setUserLocalData] = useState(localUserData);
+  const [muted, setMuted] = useState(true);
 
   const setUserToken = (refresh_token, access_token) => {
     localStorage.setItem("refresh_token", refresh_token);
@@ -37,6 +39,20 @@ export const AuthProvider = ({ children }) => {
     setUserLocalData(data);
   };
 
+  const getProfile = async () => {
+    try {
+      setLoading(true);
+      const res = await Backend.get(`/bobur_qalandar0v`);
+      setUserProfile(res.data);
+      setUserPosts(res.data.posts);
+      console.log(res);
+    } catch (err) {
+      console.error("Xatolik:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getMyProfile = async () => {
     if (accessToken && refreshToken) {
       try {
@@ -44,8 +60,10 @@ export const AuthProvider = ({ children }) => {
         const res = await Backend.get(`/${userLocalData?.username}`);
         setMyProfile(res.data);
         setMyPosts(res.data.posts);
+        setMuted(res.data?.posts?.map(() => true));
       } catch (err) {
         console.error("Xatolik:", err);
+        window.location.reload();
       } finally {
         setLoading(false);
       }
@@ -55,10 +73,11 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     Backend.get("/auth/check/", {
       headers: {
-        Authorization: "Bearer " + accessToken,
+        Authorization: `Bearer ${accessToken}`,
       },
     }).then((res) => {
       if (res.status === 401) {
+        localStorage.removeItem("UserData");
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
         navigate("/login");
@@ -67,7 +86,8 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    getMyProfile();
+    // getMyProfile();
+    // getProfile();
   }, []);
 
   return (
@@ -79,8 +99,10 @@ export const AuthProvider = ({ children }) => {
         accessToken,
         userLocalData,
         myProfile,
+        userProfile,
+        userPosts,
         myPosts,
-        getMyProfile,
+        getProfile,
         setMyPosts,
         setMyProfile,
         setIsAuth,

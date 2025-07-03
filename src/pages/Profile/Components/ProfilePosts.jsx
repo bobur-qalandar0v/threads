@@ -12,7 +12,6 @@ import SaveIcon from "../../../assets/icons/SaveIcon";
 import LinkCopyIcon from "../../../assets/icons/LinkCopyIcon";
 import StatisticsIcon from "../../../assets/icons/StatisticsIcon";
 import { useLocation } from "react-router-dom";
-import { baseURL } from "../../../constants/urls";
 import DeleteIcon from "../../../assets/icons/DeleteIcon";
 import { formatDistanceToNow } from "date-fns";
 
@@ -23,7 +22,8 @@ function ProfilePosts() {
   const location = useLocation();
 
   const { showLoading } = useContext(ModalContext);
-  const { myProfile, myPosts, loading } = useContext(AuthContext);
+  const { myProfile, myPosts, userProfile, userPosts, loading } =
+    useContext(AuthContext);
   const { addFavorites, favorite } = useContext(FavoriteContext);
 
   const [showEditOptions, setShowEditOptions] = useState({});
@@ -146,8 +146,6 @@ function ProfilePosts() {
     setMutedStates(newStates);
   }, [myPosts]);
 
-  // console.log(myPosts);
-
   const renderPostMenu = (post) => {
     const canEdit = showEditOptions[post.uid] ?? false;
     const timeRemaining = timeLeft[post.uid] || { mins: 0, secs: 0 };
@@ -204,11 +202,15 @@ function ProfilePosts() {
     );
   };
 
+  {
+    // userProfile?.is_owner === false ? ;
+  }
+
   return loading ? (
     <div className="loader__wrap">
       <div className="loader"></div>
     </div>
-  ) : (
+  ) : userProfile?.is_owner === true ? (
     <div className="posts" ref={profileMainRef}>
       <div className="posts__publish">
         <img
@@ -301,7 +303,7 @@ function ProfilePosts() {
                               ref={(el) => {
                                 if (el) videoRefs.current[refIndex] = el;
                               }}
-                              src={`${baseURL.url}${i.media}`}
+                              src={`${i.media}`}
                               muted={mutedStates[key]}
                               loop
                               playsInline
@@ -347,7 +349,7 @@ function ProfilePosts() {
                           }}
                         >
                           <img
-                            src={`${baseURL.url}${i.media}`}
+                            src={`${i.media}`}
                             alt="image"
                             style={{
                               width: "100%",
@@ -416,6 +418,202 @@ function ProfilePosts() {
         );
       })}
     </div>
+  ) : (
+    <>
+      <div className="posts" ref={profileMainRef}>
+        {userPosts?.map((item, postIndex) => {
+          const isLiked = favorite.some((fav) => fav.uid === item.uid);
+          return (
+            <div className="posts-list" key={postIndex}>
+              <div className="posts__list-wrap">
+                <div className="posts__list-item">
+                  <div className="img__wrap">
+                    <img
+                      width={40}
+                      height={40}
+                      style={{ borderRadius: "24px" }}
+                      src={
+                        myProfile?.photo === null
+                          ? "https://www.instagram.com/static/images/text_app/profile_picture/profile_pic.png/72f3228a91ee.png"
+                          : myProfile?.photo
+                      }
+                      alt="img"
+                    />
+                  </div>
+                  <div className="content__wrap">
+                    <div className="header__wrapper">
+                      <div className="user__wrap">
+                        <p className="user__name">{item?.author?.username}</p>
+                        <div className="post__created-time">
+                          {formatDistanceToNow(new Date(item.created_at), {
+                            addSuffix: true,
+                          })}
+                        </div>
+                      </div>
+                      <button
+                        className="dots__menu"
+                        onClick={() => handleInfoModal(item.uid)}
+                      >
+                        <span>
+                          <DotsIcon />
+                        </span>
+                      </button>
+                    </div>
+
+                    {activePostId === item?.uid && renderPostMenu(item)}
+
+                    {item?.content && (
+                      <p className="post__text">{item?.content}</p>
+                    )}
+                    {(item?.videos?.length > 0 || item?.images?.length > 0) && (
+                      <div className="media__wrap">
+                        {item?.videos?.map((i, videoIndex) => {
+                          const key = `${postIndex}-${videoIndex}`;
+                          const refIndex = postIndex * 1000 + videoIndex;
+                          return (
+                            <div
+                              className="video__wrap"
+                              style={{
+                                width:
+                                  item?.videos?.length === 1 &&
+                                  item?.images?.length === 0
+                                    ? "350px"
+                                    : "260px",
+                                height:
+                                  item?.videos?.length === 1 &&
+                                  item?.images?.length === 0
+                                    ? "430px"
+                                    : "320px",
+                                position: "relative",
+                                flexShrink: 0,
+                              }}
+                            >
+                              <video
+                                ref={(el) => {
+                                  if (el) videoRefs.current[refIndex] = el;
+                                }}
+                                src={`${i.media}`}
+                                muted={mutedStates[key]}
+                                loop
+                                playsInline
+                                autoPlay
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "cover",
+                                  borderRadius: "8px",
+                                }}
+                              />
+                              <button
+                                className="volume__muted-btn"
+                                onClick={() =>
+                                  handleMute(postIndex, videoIndex)
+                                }
+                              >
+                                {mutedStates[key] ? (
+                                  <VolumeMutedIcon />
+                                ) : (
+                                  <VolumeIcon />
+                                )}
+                              </button>
+                            </div>
+                          );
+                        })}
+
+                        {item?.images?.map((i) => (
+                          <div
+                            className="image__wrap"
+                            style={{
+                              width: `${
+                                item?.images?.length === 1 &&
+                                item?.videos?.length === 0
+                                  ? "300px"
+                                  : "320px"
+                              }`,
+                              height: `${
+                                item?.images?.length === 1 &&
+                                item?.videos?.length === 0
+                                  ? "320px"
+                                  : "320px"
+                              }`,
+                              flexShrink: 0,
+                            }}
+                          >
+                            <img
+                              src={`${i.media}`}
+                              alt="image"
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                                borderRadius: "8px",
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <div className="actions">
+                      <div className="actions__wrap">
+                        <div className="heart__action">
+                          <button
+                            className="actions__icon"
+                            onClick={() => handleFavorite(item)}
+                          >
+                            <HeartActionIcon
+                              style={{
+                                fill: isLiked ? "red" : "none",
+                                stroke: isLiked ? "red" : "#fff",
+                              }}
+                            />
+                            <span
+                              className={
+                                animatedCounts[item.uid]?.animate
+                                  ? "like-anim"
+                                  : ""
+                              }
+                              style={{
+                                color: `${isLiked ? "red" : "#fff"}`,
+                                fontSize: "17px",
+                                marginTop: "4px",
+                              }}
+                            >
+                              {item?.likes_count === 0
+                                ? null
+                                : item?.likes_count}
+                            </span>
+                          </button>
+                        </div>
+                        <div className="comment__action">
+                          <button className="actions__icon">
+                            <CommentIcon />
+                            <span style={{ fontSize: "17px" }}>
+                              {item?.comments_count === 0
+                                ? null
+                                : item?.comments_count}
+                            </span>
+                          </button>
+                        </div>
+                        <div className="share__action">
+                          <button className="actions__icon">
+                            <ShareIcon />
+                            <span style={{ fontSize: "17px" }}>
+                              {item?.views_count === 0
+                                ? null
+                                : item?.views_count}
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </>
   );
 }
 

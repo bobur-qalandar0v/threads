@@ -1,5 +1,5 @@
 import { createContext, useEffect, useRef, useState } from "react";
-import { API, Backend } from "../api";
+import { Backend } from "../api";
 import { backendurls, urls } from "../constants/urls";
 import { message } from "antd";
 
@@ -25,7 +25,6 @@ export const ModalProvider = ({ children }) => {
       .then((res) => {
         setPost(res.data);
         setMuted(res.data.map(() => true));
-        // console.log(res);
       })
       .catch((err) => {
         message.error("Xatolik");

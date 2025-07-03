@@ -23,7 +23,7 @@ function SignUp() {
       const formData = new FormData();
       formData.append("username", username);
       const response = await Backend.post("/check/username", formData);
-
+      console.log("username: ", response);
       return response.data.available;
     } catch (err) {
       console.log(err);
@@ -36,7 +36,7 @@ function SignUp() {
       const formData = new FormData();
       formData.append("email", email);
       const response = await Backend.post("/check/email", formData);
-
+      console.log("email ", response);
       return response.data.available;
     } catch (err) {
       console.log(err);
@@ -49,7 +49,7 @@ function SignUp() {
       const formData = new FormData();
       formData.append("phone", phone);
       const response = await Backend.post("/check/phone", formData);
-
+      console.log("phone ", response);
       return response.data.available;
     } catch (err) {
       console.log(err);
