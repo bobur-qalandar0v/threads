@@ -22,15 +22,8 @@ export const AuthProvider = ({ children }) => {
   const [isAuth, setIsAuth] = useState(false);
   const [myProfile, setMyProfile] = useState([]);
   const [myPosts, setMyPosts] = useState([]);
-  const [userProfile, setUserProfile] = useState([]);
   const [userPosts, setUserPosts] = useState([]);
   const [userLocalData, setUserLocalData] = useState(localUserData);
-  const localUsername = localStorage.getItem("userProfile")
-    ? JSON.parse(localStorage.getItem("userProfile"))
-    : userLocalData?.username;
-
-  const [username, setUsername] = useState(localUsername);
-
   const [muted, setMuted] = useState(true);
 
   const setUserToken = (refresh_token, access_token) => {
@@ -43,19 +36,6 @@ export const AuthProvider = ({ children }) => {
   const setLocalUserInfo = (data) => {
     localStorage.setItem("UserData", JSON.stringify(data));
     setUserLocalData(data);
-  };
-
-  const getProfile = async () => {
-    try {
-      // setLoading(true);
-      const res = await Backend.get(`/${username}`);
-      setUserProfile(res.data);
-      setUserPosts(res.data.posts);
-    } catch (err) {
-      console.error("Xatolik:", err);
-    } finally {
-      // setLoading(false);
-    }
   };
 
   const getMyProfile = async () => {
@@ -90,7 +70,6 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     getMyProfile();
-    getProfile();
   }, []);
 
   return (
@@ -102,15 +81,13 @@ export const AuthProvider = ({ children }) => {
         accessToken,
         userLocalData,
         myProfile,
-        userProfile,
         userPosts,
         myPosts,
-        setUsername,
-        getProfile,
-        setMyPosts,
-        setMyProfile,
         setIsAuth,
+        setMyPosts,
         setUserToken,
+        setMyProfile,
+        setUserPosts,
         setAccessToken,
         setUserLocalData,
         setLocalUserInfo,

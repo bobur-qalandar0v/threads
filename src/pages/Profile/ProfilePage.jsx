@@ -1,29 +1,56 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import InsightsIcon from "../../assets/icons/InsigthsIcon";
 import { AuthContext } from "../../contexts/AuthContext";
-import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import {
+  Link,
+  NavLink,
+  Outlet,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import { ModalContext } from "../../contexts/ModalContext";
 import PrevIcon from "../../assets/icons/PrevIcon";
+import { Backend } from "../../api";
 
 function ProfilePage() {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
-  const { loading, myProfile, userProfile, getProfile, setUsername } =
-    useContext(AuthContext);
-
+  const { myProfile, setUserPosts } = useContext(AuthContext);
   const { showEditModal } = useContext(ModalContext);
 
+  const [userProfile, setUserProfile] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Profil username ni ajratib olish (bo'limlarni e'tiborsiz qoldirish)
+  const getUsernameFromPath = (path) => {
+    const match = path.match(/^\/@([^\/]+)/);
+    return match ? match[1] : null;
+  };
+
+  const username = getUsernameFromPath(pathname);
+
   const handleNavigate = () => {
-    localStorage.setItem("userProfile", JSON.stringify(myProfile?.username));
-    setUsername(myProfile?.username);
     navigate(-1);
   };
 
-  useEffect(() => {
-    if (userProfile?.username) {
-      getProfile({ author: { username: userProfile?.username } });
+  const getProfile = async () => {
+    try {
+      setLoading(true);
+      const res = await Backend.get(`${username}`);
+      setUserProfile(res.data);
+      setUserPosts(res.data.posts);
+      console.log(res);
+    } catch (err) {
+      console.error("Xatolik:", err);
+    } finally {
+      setLoading(false);
     }
-  }, [location.pathname]);
+  };
+
+  useEffect(() => {
+    getProfile();
+  }, [username]);
 
   return (
     <div className="profile">
@@ -172,11 +199,11 @@ function ProfilePage() {
         </>
       ) : (
         <>
-          <div className="profile__header">
+          <div className="user__profile-header">
             <button className="prev__btn" onClick={() => handleNavigate()}>
               <PrevIcon />
             </button>
-            <h3 className="title">{userProfile?.username}</h3>
+            <NavLink className="header">{userProfile?.username}</NavLink>
             <p></p>
           </div>
           <div className="profile__main">

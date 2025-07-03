@@ -642,7 +642,7 @@ function DashboardPage() {
                             `/@${item?.author?.username}`
                           }
                           className="user__name"
-                          onClick={() => handleProfile(item)}
+                          // onClick={() => handleProfile(item)}
                         >
                           {item?.author?.username}
                         </Link>
