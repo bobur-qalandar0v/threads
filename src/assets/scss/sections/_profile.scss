@@ -12,10 +12,14 @@
 
     .title {
       font-weight: 500;
+      text-decoration: none;
+      color: #fff;
+      font-size: 18px;
+      user-select: none;
     }
   }
 
-  .header{
+  .header {
     text-decoration: none;
     color: #fff;
     font-size: 18px;
@@ -378,6 +382,8 @@
     }
 
     &-wrap {
+      width: 100%;
+
       > li {
         display: flex;
         align-items: center;
@@ -410,7 +416,7 @@
     color: rgba(255, 48, 64, 1);
   }
 
-  .shikoyat {
+  .delete__btn {
     color: rgba(255, 48, 64, 1);
   }
 

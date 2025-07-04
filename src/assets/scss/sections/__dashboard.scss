@@ -59,13 +59,59 @@
   }
 
   .posts-list {
-    padding: 20px;
+    padding: 20px 20px 8px 20px;
     border-bottom: 1px solid rgba(243, 245, 247, 0.15);
   }
 
   .posts__list-item {
     display: flex;
     gap: 10px;
+
+    .img__wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .img__bottom-line {
+      margin-top: 10px;
+      width: 3px;
+      background-color: rgb(62, 63, 64);
+      height: 100%;
+      border-radius: 4px;
+    }
+  }
+
+  .comment__open {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .info__wrap {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+
+    .username {
+      font-size: 18px;
+    }
+  }
+
+  .submit-btn-wrap {
+    width: 45px;
+    height: 42px;
+    background-color: #fff;
+    border-radius: 50%;
+    transition: all 0.1s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      transform: scale(1.1);
+    }
   }
 
   .header__wrapper {
@@ -166,29 +212,11 @@
   }
 
   .media__wrap {
-    // padding-left: 100px;
-    // padding-right: 60px;
-    // margin-left: -100px;
-    // border-radius: 8px;
     margin-top: 15px;
     display: flex;
     align-items: start;
     justify-content: start;
     gap: 8px;
-    // overflow-x: auto;
-    // overflow-y: hidden;
-    // cursor: grab;
-    // scrollbar-width: none;
-    // width: 700px;
-    // scroll-behavior: smooth;
-
-    // &.active {
-    //   cursor: grabbing;
-    // }
-
-    // &::-webkit-scrollbar {
-    //   display: none;
-    // }
   }
 
   .swiper-wrapper {
@@ -210,12 +238,13 @@
   .actions {
     display: flex;
     margin-top: 10px;
+    margin-left: -14px;
 
     &__wrap {
       display: inherit;
       align-items: center;
       justify-content: center;
-      gap: 20px;
+      gap: 10px;
     }
 
     &__icon {
@@ -225,6 +254,21 @@
       gap: 6px;
       > span {
         color: white;
+      }
+    }
+
+    .heart__action,
+    .comment__action,
+    .share__action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 16px;
+      padding: 3px 14px;
+      transition: all 0.2s ease-in-out;
+
+      &:hover {
+        background-color: #403f3f46;
       }
     }
 

@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     getMyProfile();
-  }, []);
+  }, [userLocalData]);
 
   return (
     <AuthContext.Provider

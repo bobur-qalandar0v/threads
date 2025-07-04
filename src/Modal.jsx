@@ -42,7 +42,6 @@ function ModalComponent() {
           },
         }
       );
-      console.log(response);
 
       handleCancel();
       setSelectedFiles([]);

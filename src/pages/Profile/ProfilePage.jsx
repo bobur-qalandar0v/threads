@@ -40,7 +40,6 @@ function ProfilePage() {
       const res = await Backend.get(`${username}`);
       setUserProfile(res.data);
       setUserPosts(res.data.posts);
-      console.log(res);
     } catch (err) {
       console.error("Xatolik:", err);
     } finally {
@@ -57,7 +56,7 @@ function ProfilePage() {
       {userProfile?.is_owner === true ? (
         <>
           <div className="profile__header">
-            <h3 className="title">Профиль</h3>
+            <NavLink className="title">Профиль</NavLink>
           </div>
           <div className="profile__main">
             {loading ? (

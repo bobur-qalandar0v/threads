@@ -33,7 +33,7 @@ export function FavoriteProvider({ children }) {
 
     // Backend so‘rovi (faqat signal sifatida)
     Backend.post(
-      `${backendurls.user_post.like}/${updatedData.uid}/like`,
+      `posts/${updatedData.uid}/like`,
       {
         likes_count: updatedData.likes_count,
       },
@@ -45,7 +45,7 @@ export function FavoriteProvider({ children }) {
       }
     )
       .then((res) => {
-        if (res.status === 201) {
+        if (res.status === 201 || res.status === 204) {
           // Post ro‘yxatini yangilash
           setPost((prevPosts) =>
             prevPosts.map((post) =>
@@ -58,27 +58,8 @@ export function FavoriteProvider({ children }) {
       })
       .catch((err) => {
         console.error("Like request error:", err);
+        console.log(err);
       });
-
-    // PATCH SO'ROV
-    // Backend.patch(`${backendurls.user_post.like}/${updatedData.uid}/like/`, {
-    //   likes_count: updatedData.likes_count,
-    // })
-    //   .then((res) => {
-    //     if (res.status === 200 || res.status === 201) {
-    //       setPost((prevPosts) =>
-    //         prevPosts.map((post) =>
-    //           post.uid === updatedData.uid
-    //             ? { ...post, likes_count: updatedData.likes_count }
-    //             : post
-    //         )
-    //       );
-    //     }
-    //   })
-    //   .catch((err) => {
-    //     console.error("Like request error:", err);
-    //     message.error("Layk bosilmadi");
-    //   });
   }
 
   function deleteFavorite(id) {

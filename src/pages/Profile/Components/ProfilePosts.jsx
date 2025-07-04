@@ -184,7 +184,7 @@ function ProfilePosts() {
           <div className="line"></div>
 
           <div className="post__menu-list-wrap delete">
-            <li className="shikoyat">
+            <li className="delete__btn">
               <span>Удалить</span>
               <DeleteIcon />
             </li>
@@ -201,8 +201,6 @@ function ProfilePosts() {
       </div>
     );
   };
-
-  // console.log(userPosts)
 
   return loading ? (
     <div className="loader__wrap">
