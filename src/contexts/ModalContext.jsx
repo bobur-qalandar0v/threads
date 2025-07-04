@@ -7,10 +7,13 @@ export const ModalContext = createContext(null);
 
 export const ModalProvider = ({ children }) => {
   const openMenuRef = useRef(null);
-
   const mainRef = useRef(null);
 
   const [openModal, setOpenModal] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({
+    isOpen: false,
+    postUid: null,
+  });
   const [loading, setLoading] = useState(false);
   const [editModal, setEditModal] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
@@ -43,6 +46,16 @@ export const ModalProvider = ({ children }) => {
           : post
       )
     );
+  };
+
+  // const handlePostDelete = (uid) => {
+  //   Backend.delete(`/posts/${uid}`).then((res) => {
+  //     console.log(res);
+  //   });
+  // };
+
+  const showDeleteModal = (uid) => {
+    setDeleteModal({ isOpen: true, uid });
   };
 
   const showLoading = () => {
@@ -87,6 +100,9 @@ export const ModalProvider = ({ children }) => {
         openMenuRef,
         mainRef,
         getHandleLike,
+        setDeleteModal,
+        deleteModal,
+        showDeleteModal,
       }}
     >
       {children}

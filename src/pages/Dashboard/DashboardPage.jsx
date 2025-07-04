@@ -1,26 +1,26 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { ModalContext } from "../../contexts/ModalContext";
+import { FavoriteContext } from "../../contexts/FavoriteContext";
+import VolumeMutedIcon from "../../assets/icons/VolumeMutedIcon";
+import VolumeIcon from "../../assets/icons/VolumeIcon";
+import SaveIcon from "../../assets/icons/SaveIcon";
 import HeartActionIcon from "../../assets/icons/HeartActionIcon";
 import CommentIcon from "../../assets/icons/CommentIcon";
 import DotsIcon from "../../assets/icons/DotsIcon";
-import { FavoriteContext } from "../../contexts/FavoriteContext";
-import SaveIcon from "../../assets/icons/SaveIcon";
 import NotInterestingIcon from "../../assets/icons/NotInterestingIcon";
 import BlokIcon from "../../assets/icons/BlokIcon";
 import LinkCopyIcon from "../../assets/icons/LinkCopyIcon";
 import ComplainIcon from "../../assets/icons/ComplainIcon";
+import RepostIcon from "../../assets/icons/RepostIcon";
+import SendIcon from "../../assets/icons/SendIcon";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/AuthContext";
 import { Swiper, SwiperSlide } from "swiper/react";
 import SwiperCore from "swiper";
 import { FreeMode } from "swiper/modules";
-import "swiper/css/free-mode";
-import VolumeMutedIcon from "../../assets/icons/VolumeMutedIcon";
-import VolumeIcon from "../../assets/icons/VolumeIcon";
 import { formatDistanceToNow } from "date-fns";
-import RepostIcon from "../../assets/icons/RepostIcon";
-import SendIcon from "../../assets/icons/SendIcon";
 import { Backend } from "../../api";
+import "swiper/css/free-mode";
 import { message } from "antd";
 SwiperCore.use([FreeMode]);
 
@@ -29,6 +29,7 @@ function DashboardPage() {
   const menuRef = useRef(null);
   const dashboardMainRef = useRef(null);
   const textareaRef = useRef(null);
+  const navigate = useNavigate();
 
   const { showLoading, post, setPost, getPosts, loading } =
     useContext(ModalContext);
@@ -144,6 +145,21 @@ function DashboardPage() {
 
     setMutedStates(updatedStates);
   };
+
+  useEffect(() => {
+    Backend.get("/auth/check/", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }).catch((err) => {
+      if (err.status === 401) {
+        localStorage.removeItem("UserData");
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        navigate("/login");
+      }
+    });
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -531,7 +547,14 @@ function DashboardPage() {
                           alt="user-img"
                           style={{ borderRadius: "24px" }}
                         />
-                        <div style={{ flex: 1 }}>
+                        <div
+                          style={{
+                            flex: 1,
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "6px",
+                          }}
+                        >
                           <p className="username">{myProfile?.username}</p>
                           <textarea
                             className="textarea"

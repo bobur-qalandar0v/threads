@@ -11,17 +11,22 @@ import VolumeMutedIcon from "../../../assets/icons/VolumeMutedIcon";
 import SaveIcon from "../../../assets/icons/SaveIcon";
 import LinkCopyIcon from "../../../assets/icons/LinkCopyIcon";
 import StatisticsIcon from "../../../assets/icons/StatisticsIcon";
-import { useLocation } from "react-router-dom";
 import DeleteIcon from "../../../assets/icons/DeleteIcon";
+import DeleteModal from "./DeleteModal";
 import { formatDistanceToNow } from "date-fns";
+import { Swiper, SwiperSlide } from "swiper/react";
+import SwiperCore from "swiper";
+import { FreeMode } from "swiper/modules";
+import "swiper/css/free-mode";
+SwiperCore.use([FreeMode]);
 
 function ProfilePosts() {
   const videoRefs = useRef([]);
   const menuRef = useRef(null);
   const profileMainRef = useRef(null);
-  const location = useLocation();
 
-  const { showLoading } = useContext(ModalContext);
+  const { showLoading, showDeleteModal, deleteModal } =
+    useContext(ModalContext);
   const { myProfile, myPosts, userProfile, userPosts, loading } =
     useContext(AuthContext);
   const { addFavorites, favorite } = useContext(FavoriteContext);
@@ -35,6 +40,14 @@ function ProfilePosts() {
   const openModal = () => {
     showLoading();
   };
+
+  const handleOpenDeleteModal = (uid) => {
+    setActivePostId(null);
+    showDeleteModal(uid);
+  };
+
+  // console.log(deleteModal);
+
   const handleInfoModal = (postId) => {
     setActivePostId(activePostId === postId ? null : postId);
   };
@@ -67,11 +80,14 @@ function ProfilePosts() {
   };
 
   const handleMute = (postIndex, videoIndex) => {
-    const key = `${postIndex}-${videoIndex}`;
-    setMutedStates((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
+    const clickedKey = `${postIndex}-${videoIndex}`;
+    const updatedStates = {};
+
+    Object.keys(mutedStates).forEach((key) => {
+      updatedStates[key] = key === clickedKey ? !mutedStates[key] : true;
+    });
+
+    setMutedStates(updatedStates);
   };
 
   // Vaqtni hisoblash va edit imkoniyatini yangilash
@@ -104,6 +120,28 @@ function ProfilePosts() {
     setTimeLeft(newTimeLeft);
     setShowEditOptions(newShowEditOptions);
   };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const video = entry.target;
+          if (entry.isIntersecting) {
+            video.play().catch(() => {});
+          } else {
+            video.pause();
+          }
+        });
+      },
+      { threshold: 0.6 }
+    );
+
+    videoRefs.current.forEach((video) => {
+      if (video) observer.observe(video);
+    });
+
+    return () => observer.disconnect();
+  }, [myPosts]);
 
   useEffect(() => {
     updateTimers();
@@ -184,7 +222,10 @@ function ProfilePosts() {
           <div className="line"></div>
 
           <div className="post__menu-list-wrap delete">
-            <li className="delete__btn">
+            <li
+              className="delete__btn"
+              onClick={() => handleOpenDeleteModal(post.uid)}
+            >
               <span>Удалить</span>
               <DeleteIcon />
             </li>
@@ -272,38 +313,184 @@ function ProfilePosts() {
                   {item?.content && (
                     <p className="post__text">{item?.content}</p>
                   )}
-                  {(item?.videos?.length > 0 || item?.images?.length > 0) && (
-                    <div className="media__wrap">
-                      {item?.videos?.map((i, videoIndex) => {
-                        const key = `${postIndex}-${videoIndex}`;
-                        const refIndex = postIndex * 1000 + videoIndex;
-                        return (
+
+                  <Swiper
+                    slidesPerView={"auto"}
+                    spaceBetween={6}
+                    freeMode={true}
+                    grabCursor={true}
+                    style={{ padding: "4px 0" }}
+                  >
+                    <SwiperSlide
+                      style={{
+                        borderRadius: "8px",
+                      }}
+                    >
+                      {/* {(item?.videos?.length > 0 ||
+                        item?.images?.length > 0) && (
+                        <div className="media__wrap">
+                          {item?.videos?.map((i, videoIndex) => {
+                            const key = `${postIndex}-${videoIndex}`;
+                            const refIndex = postIndex * 1000 + videoIndex;
+                            return (
+                              <div
+                                className="video__wrap"
+                                style={{
+                                  width:
+                                    item?.videos?.length === 1 &&
+                                    item?.images?.length === 0
+                                      ? "350px"
+                                      : "260px",
+                                  height:
+                                    item?.videos?.length === 1 &&
+                                    item?.images?.length === 0
+                                      ? "430px"
+                                      : "320px",
+                                  position: "relative",
+                                  flexShrink: 0,
+                                }}
+                              >
+                                <video
+                                  ref={(el) => {
+                                    if (el) videoRefs.current[refIndex] = el;
+                                  }}
+                                  src={`${i.media}`}
+                                  muted={mutedStates[key]}
+                                  loop
+                                  playsInline
+                                  autoPlay
+                                  style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "cover",
+                                    borderRadius: "8px",
+                                  }}
+                                />
+                                <button
+                                  className="volume__muted-btn"
+                                  onClick={() =>
+                                    handleMute(postIndex, videoIndex)
+                                  }
+                                >
+                                  {mutedStates[key] ? (
+                                    <VolumeMutedIcon />
+                                  ) : (
+                                    <VolumeIcon />
+                                  )}
+                                </button>
+                              </div>
+                            );
+                          })}
+
+                          {item?.images?.map((i) => (
+                            <div
+                              className="image__wrap"
+                              style={{
+                                width: `${
+                                  item?.images?.length === 1 &&
+                                  item?.videos?.length === 0
+                                    ? "300px"
+                                    : "320px"
+                                }`,
+                                height: `${
+                                  item?.images?.length === 1 &&
+                                  item?.videos?.length === 0
+                                    ? "320px"
+                                    : "320px"
+                                }`,
+                                flexShrink: 0,
+                              }}
+                            >
+                              <img
+                                src={`${i.media}`}
+                                alt="image"
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "cover",
+                                  borderRadius: "8px",
+                                }}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )} */}
+                      <div className="media__wrap" key={item?.uid}>
+                        {item?.videos?.map((i, videoIndex) => {
+                          if (!i?.media) return null;
+                          const key = `${postIndex}-${videoIndex}`;
+                          const refIndex = postIndex * 1000 + videoIndex;
+                          return (
+                            <div
+                              className="video__wrap"
+                              style={{
+                                width:
+                                  item?.videos?.length === 1 &&
+                                  item?.images?.length === 0
+                                    ? "350px"
+                                    : "300px",
+                                height:
+                                  item?.videos?.length === 1 &&
+                                  item?.images?.length === 0
+                                    ? "430px"
+                                    : "340px",
+                                position: "relative",
+                                flexShrink: 0,
+                              }}
+                            >
+                              <video
+                                ref={(el) => {
+                                  if (el) videoRefs.current[refIndex] = el;
+                                }}
+                                src={i?.media}
+                                muted={mutedStates[key]}
+                                loop
+                                playsInline
+                                autoPlay
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "cover",
+                                  borderRadius: "8px",
+                                }}
+                              />
+                              <button
+                                className="volume__muted-btn"
+                                onClick={() =>
+                                  handleMute(postIndex, videoIndex)
+                                }
+                              >
+                                {mutedStates[key] ? (
+                                  <VolumeMutedIcon />
+                                ) : (
+                                  <VolumeIcon />
+                                )}
+                              </button>
+                            </div>
+                          );
+                        })}
+
+                        {item?.images?.map((i) => (
                           <div
-                            className="video__wrap"
+                            className="image__wrap"
                             style={{
-                              width:
-                                item?.videos?.length === 1 &&
-                                item?.images?.length === 0
-                                  ? "350px"
-                                  : "260px",
-                              height:
-                                item?.videos?.length === 1 &&
-                                item?.images?.length === 0
-                                  ? "430px"
-                                  : "320px",
-                              position: "relative",
-                              flexShrink: 0,
+                              width: `${
+                                item?.images?.length === 1 &&
+                                item?.videos?.length === 0
+                                  ? "330px"
+                                  : "320px"
+                              }`,
+                              height: `${
+                                item?.images?.length === 1 &&
+                                item?.videos?.length === 0
+                                  ? "400px"
+                                  : "340px"
+                              }`,
                             }}
                           >
-                            <video
-                              ref={(el) => {
-                                if (el) videoRefs.current[refIndex] = el;
-                              }}
-                              src={`${i.media}`}
-                              muted={mutedStates[key]}
-                              loop
-                              playsInline
-                              autoPlay
+                            <img
+                              src={i.media}
+                              alt="image"
                               style={{
                                 width: "100%",
                                 height: "100%",
@@ -311,53 +498,11 @@ function ProfilePosts() {
                                 borderRadius: "8px",
                               }}
                             />
-                            <button
-                              className="volume__muted-btn"
-                              onClick={() => handleMute(postIndex, videoIndex)}
-                            >
-                              {mutedStates[key] ? (
-                                <VolumeMutedIcon />
-                              ) : (
-                                <VolumeIcon />
-                              )}
-                            </button>
                           </div>
-                        );
-                      })}
-
-                      {item?.images?.map((i) => (
-                        <div
-                          className="image__wrap"
-                          style={{
-                            width: `${
-                              item?.images?.length === 1 &&
-                              item?.videos?.length === 0
-                                ? "300px"
-                                : "320px"
-                            }`,
-                            height: `${
-                              item?.images?.length === 1 &&
-                              item?.videos?.length === 0
-                                ? "320px"
-                                : "320px"
-                            }`,
-                            flexShrink: 0,
-                          }}
-                        >
-                          <img
-                            src={`${i.media}`}
-                            alt="image"
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
-                              borderRadius: "8px",
-                            }}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                        ))}
+                      </div>
+                    </SwiperSlide>
+                  </Swiper>
                   <div className="actions">
                     <div className="actions__wrap">
                       <div className="heart__action">
@@ -413,6 +558,7 @@ function ProfilePosts() {
           </div>
         );
       })}
+      {deleteModal.isOpen ? <DeleteModal uid={deleteModal.uid} /> : <></>}
     </div>
   ) : (
     <>
@@ -461,38 +607,183 @@ function ProfilePosts() {
                     {item?.content && (
                       <p className="post__text">{item?.content}</p>
                     )}
-                    {(item?.videos?.length > 0 || item?.images?.length > 0) && (
-                      <div className="media__wrap">
-                        {item?.videos?.map((i, videoIndex) => {
-                          const key = `${postIndex}-${videoIndex}`;
-                          const refIndex = postIndex * 1000 + videoIndex;
-                          return (
+                    <Swiper
+                      spaceBetween={6}
+                      slidesPerView={"auto"}
+                      freeMode={true}
+                      grabCursor={true}
+                      style={{ padding: "4px 0" }}
+                    >
+                      <SwiperSlide
+                        style={{
+                          borderRadius: "8px",
+                        }}
+                      >
+                        {/* {(item?.videos?.length > 0 ||
+                          item?.images?.length > 0) && (
+                          <div className="media__wrap">
+                            {item?.videos?.map((i, videoIndex) => {
+                              const key = `${postIndex}-${videoIndex}`;
+                              const refIndex = postIndex * 1000 + videoIndex;
+                              return (
+                                <div
+                                  className="video__wrap"
+                                  style={{
+                                    width:
+                                      item?.videos?.length === 1 &&
+                                      item?.images?.length === 0
+                                        ? "350px"
+                                        : "260px",
+                                    height:
+                                      item?.videos?.length === 1 &&
+                                      item?.images?.length === 0
+                                        ? "430px"
+                                        : "320px",
+                                    position: "relative",
+                                    flexShrink: 0,
+                                  }}
+                                >
+                                  <video
+                                    ref={(el) => {
+                                      if (el) videoRefs.current[refIndex] = el;
+                                    }}
+                                    src={`${i.media}`}
+                                    muted={mutedStates[key]}
+                                    loop
+                                    playsInline
+                                    autoPlay
+                                    style={{
+                                      width: "100%",
+                                      height: "100%",
+                                      objectFit: "cover",
+                                      borderRadius: "8px",
+                                    }}
+                                  />
+                                  <button
+                                    className="volume__muted-btn"
+                                    onClick={() =>
+                                      handleMute(postIndex, videoIndex)
+                                    }
+                                  >
+                                    {mutedStates[key] ? (
+                                      <VolumeMutedIcon />
+                                    ) : (
+                                      <VolumeIcon />
+                                    )}
+                                  </button>
+                                </div>
+                              );
+                            })}
+
+                            {item?.images?.map((i) => (
+                              <div
+                                className="image__wrap"
+                                style={{
+                                  width: `${
+                                    item?.images?.length === 1 &&
+                                    item?.videos?.length === 0
+                                      ? "300px"
+                                      : "320px"
+                                  }`,
+                                  height: `${
+                                    item?.images?.length === 1 &&
+                                    item?.videos?.length === 0
+                                      ? "320px"
+                                      : "320px"
+                                  }`,
+                                  flexShrink: 0,
+                                }}
+                              >
+                                <img
+                                  src={`${i.media}`}
+                                  alt="image"
+                                  style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "cover",
+                                    borderRadius: "8px",
+                                  }}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        )} */}
+                        <div className="media__wrap" key={item?.uid}>
+                          {item?.videos?.map((i, videoIndex) => {
+                            if (!i?.media) return null;
+                            const key = `${postIndex}-${videoIndex}`;
+                            const refIndex = postIndex * 1000 + videoIndex;
+                            return (
+                              <div
+                                className="video__wrap"
+                                style={{
+                                  width:
+                                    item?.videos?.length === 1 &&
+                                    item?.images?.length === 0
+                                      ? "350px"
+                                      : "300px",
+                                  height:
+                                    item?.videos?.length === 1 &&
+                                    item?.images?.length === 0
+                                      ? "430px"
+                                      : "340px",
+                                  position: "relative",
+                                  flexShrink: 0,
+                                }}
+                              >
+                                <video
+                                  ref={(el) => {
+                                    if (el) videoRefs.current[refIndex] = el;
+                                  }}
+                                  src={i?.media}
+                                  muted={mutedStates[key]}
+                                  loop
+                                  playsInline
+                                  autoPlay
+                                  style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "cover",
+                                    borderRadius: "8px",
+                                  }}
+                                />
+                                <button
+                                  className="volume__muted-btn"
+                                  onClick={() =>
+                                    handleMute(postIndex, videoIndex)
+                                  }
+                                >
+                                  {mutedStates[key] ? (
+                                    <VolumeMutedIcon />
+                                  ) : (
+                                    <VolumeIcon />
+                                  )}
+                                </button>
+                              </div>
+                            );
+                          })}
+
+                          {item?.images?.map((i) => (
                             <div
-                              className="video__wrap"
+                              className="image__wrap"
                               style={{
-                                width:
-                                  item?.videos?.length === 1 &&
-                                  item?.images?.length === 0
-                                    ? "350px"
-                                    : "260px",
-                                height:
-                                  item?.videos?.length === 1 &&
-                                  item?.images?.length === 0
-                                    ? "430px"
-                                    : "320px",
-                                position: "relative",
-                                flexShrink: 0,
+                                width: `${
+                                  item?.images?.length === 1 &&
+                                  item?.videos?.length === 0
+                                    ? "330px"
+                                    : "320px"
+                                }`,
+                                height: `${
+                                  item?.images?.length === 1 &&
+                                  item?.videos?.length === 0
+                                    ? "400px"
+                                    : "340px"
+                                }`,
                               }}
                             >
-                              <video
-                                ref={(el) => {
-                                  if (el) videoRefs.current[refIndex] = el;
-                                }}
-                                src={`${i.media}`}
-                                muted={mutedStates[key]}
-                                loop
-                                playsInline
-                                autoPlay
+                              <img
+                                src={i.media}
+                                alt="image"
                                 style={{
                                   width: "100%",
                                   height: "100%",
@@ -500,55 +791,12 @@ function ProfilePosts() {
                                   borderRadius: "8px",
                                 }}
                               />
-                              <button
-                                className="volume__muted-btn"
-                                onClick={() =>
-                                  handleMute(postIndex, videoIndex)
-                                }
-                              >
-                                {mutedStates[key] ? (
-                                  <VolumeMutedIcon />
-                                ) : (
-                                  <VolumeIcon />
-                                )}
-                              </button>
                             </div>
-                          );
-                        })}
+                          ))}
+                        </div>
+                      </SwiperSlide>
+                    </Swiper>
 
-                        {item?.images?.map((i) => (
-                          <div
-                            className="image__wrap"
-                            style={{
-                              width: `${
-                                item?.images?.length === 1 &&
-                                item?.videos?.length === 0
-                                  ? "300px"
-                                  : "320px"
-                              }`,
-                              height: `${
-                                item?.images?.length === 1 &&
-                                item?.videos?.length === 0
-                                  ? "320px"
-                                  : "320px"
-                              }`,
-                              flexShrink: 0,
-                            }}
-                          >
-                            <img
-                              src={`${i.media}`}
-                              alt="image"
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover",
-                                borderRadius: "8px",
-                              }}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    )}
                     <div className="actions">
                       <div className="actions__wrap">
                         <div className="heart__action">

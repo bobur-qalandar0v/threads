@@ -12,7 +12,7 @@ import { AuthContext } from "./contexts/AuthContext";
 function ModalComponent() {
   const { openModal, handleCancel, loading, getPosts } =
     useContext(ModalContext);
-  const { accessToken, myProfile } = useContext(AuthContext);
+  const { accessToken, myProfile, getMyProfile } = useContext(AuthContext);
   const [value, setValue] = useState("");
   const [isPublishing, setIsPublishing] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -47,6 +47,7 @@ function ModalComponent() {
       setSelectedFiles([]);
       setValue("");
       getPosts();
+      getMyProfile();
       message.success("Post joylandi!");
     } catch (error) {
       console.error("Post joylashda xatolik:", error);

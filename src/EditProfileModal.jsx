@@ -68,7 +68,6 @@ function EditProfileModal() {
       }
     } catch (err) {
       console.error(err);
-      message.error("Saqlashda xatolik yuz berdi!");
     } finally {
       setIsPublishing(false);
     }

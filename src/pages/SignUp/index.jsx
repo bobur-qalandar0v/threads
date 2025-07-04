@@ -101,8 +101,8 @@ function SignUp() {
   return (
     <div className="signup">
       <div className="signup__wrap">
-        <div className="card">
-          <div className="card2">
+        <div className="card__wrap">
+          <div className="card">
             <div className="form__item">
               <Form
                 className="form"
@@ -285,13 +285,13 @@ function SignUp() {
               </Form>
             </div>
           </div>
-        </div>
-        <div className="footer">
-          <span>©&nbsp; 2025</span>
-          <span>Mavzular shartlari</span>
-          <span>Maxfiylik siyosati</span>
-          <span>Cookie siyosati</span>
-          <span>Muammo haqida xabar bering</span>
+          <div className="footer">
+            <span>©&nbsp; 2025</span>
+            <span>Mavzular shartlari</span>
+            <span>Maxfiylik siyosati</span>
+            <span>Cookie siyosati</span>
+            <span>Muammo haqida xabar bering</span>
+          </div>
         </div>
       </div>
     </div>

@@ -1,11 +1,11 @@
 import React, { useContext, useState } from "react";
 import { Button, Form, Input, message } from "antd";
-import UserIcon from "../../assets/icons/UsreIcon";
-import PasswordIcon from "../../assets/icons/PasswordIcon";
 import { useNavigate } from "react-router-dom";
 import { Backend } from "../../api";
 import { backendurls, urls } from "../../constants/urls";
 import { AuthContext } from "../../contexts/AuthContext";
+import UserNameIcon from "../../assets/icons/UserNameIcon";
+import PasswordRegisterIcon from "../../assets/icons/PasswordRegisterIcon";
 
 function SignIn() {
   const { setUserToken, setLocalUserInfo } = useContext(AuthContext);
@@ -23,7 +23,6 @@ function SignIn() {
           message.success("Tizimga muvaffaiyatli kirildi");
           navigate("/");
           setLocalUserInfo(res.data?.user);
-          // window.location.reload();
         } else {
           message.error("Tizimda xatolik");
         }
@@ -65,7 +64,7 @@ function SignIn() {
               <p id="heading">Tizimga kiring</p>
               <div className="field">
                 <span className="user__icon">
-                  <UserIcon />
+                  <UserNameIcon />
                 </span>
                 <Form.Item
                   name="login"
@@ -78,14 +77,14 @@ function SignIn() {
                 >
                   <Input
                     className="input-field"
-                    placeholder="Foydalanuchi nomi"
+                    placeholder="Foydalanuvchi nomi Email yoki Telefon raqam"
                     autoComplete="off"
                   />
                 </Form.Item>
               </div>
               <div className="field">
                 <span className="password__icon">
-                  <PasswordIcon />
+                  <PasswordRegisterIcon />
                 </span>
                 <Form.Item
                   name="password"

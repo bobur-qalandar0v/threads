@@ -25,20 +25,14 @@
   }
 
   .card {
-    background-image: linear-gradient(163deg, #00ff75 0%, #3700ff 100%);
+    // background-image: linear-gradient(163deg, #00ff75 0%, #3700ff 100%);
     border-radius: 22px;
     transition: all 0.3s;
     width: 370px;
   }
 
   .card2 {
-    border-radius: 0;
     transition: all 0.2s;
-  }
-
-  .card2:hover {
-    transform: scale(0.98);
-    border-radius: 20px;
   }
 
   #heading {
@@ -53,12 +47,11 @@
     display: flex;
     align-items: center;
     justify-content: start;
-    height: 56px;
-    border-radius: 25px;
+    height: 47px;
+    border-radius: 8px;
     border: none;
     outline: none;
-    background-color: #171717;
-    box-shadow: inset 2px 5px 10px rgb(5, 5, 5);
+    background-color: #252525;
   }
 
   .input-icon {
@@ -83,10 +76,6 @@
     color: white;
     border-radius: 25px;
 
-    &::placeholder {
-      color: white;
-    }
-
     &:hover {
       background: transparent;
       border-color: transparent;
@@ -100,10 +89,17 @@
     }
   }
 
+  .user__icon,
+  .password__icon {
+    position: absolute;
+    top: 14px;
+    left: 6px;
+  }
+
   .ant-input {
     &::placeholder {
       color: white;
-      font-size: 17px;
+      font-size: 16px;
       opacity: 0.5;
     }
   }
@@ -138,6 +134,7 @@
     border: 1px solid #333 !important;
     font-size: 18px !important;
   }
+
   .ant-message-notice-content .anticon {
     color: #ffcc00; /* icon rangini ham ko'rinadigan qilish */
   }
@@ -152,16 +149,16 @@
   .button1 {
     margin-top: 10px;
     padding: 20px 12px;
-    border-radius: 10px;
+    border-radius: 8px;
     width: 100%;
     font-size: 17px;
-    transition: 0.4s ease-in-out;
-    background-color: #252525;
+    transition: 0.3s ease-in-out;
+    background-color: #444444;
     color: white;
     border: none;
 
     &:hover {
-      background-color: #252525 !important;
+      background-color: #313131 !important;
       color: white !important;
     }
   }

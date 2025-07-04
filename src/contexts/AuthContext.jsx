@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import { Backend } from "../api";
+import { useNavigate } from "react-router-dom";
 
 export const AuthContext = createContext(null);
 
@@ -23,6 +24,7 @@ export const AuthProvider = ({ children }) => {
   const [myProfile, setMyProfile] = useState([]);
   const [myPosts, setMyPosts] = useState([]);
   const [userPosts, setUserPosts] = useState([]);
+  const [userProfile, setUserProfile] = useState([]);
   const [userLocalData, setUserLocalData] = useState(localUserData);
   const [muted, setMuted] = useState(true);
 
@@ -54,21 +56,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    Backend.get("/auth/check/", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }).then((res) => {
-      if (res.status === 401) {
-        localStorage.removeItem("UserData");
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-        navigate("/login");
-      }
-    });
-  }, []);
-
-  useEffect(() => {
     getMyProfile();
   }, [userLocalData]);
 
@@ -80,6 +67,7 @@ export const AuthProvider = ({ children }) => {
         refreshToken,
         accessToken,
         userLocalData,
+        userProfile,
         myProfile,
         userPosts,
         myPosts,
@@ -91,6 +79,8 @@ export const AuthProvider = ({ children }) => {
         setAccessToken,
         setUserLocalData,
         setLocalUserInfo,
+        setUserProfile,
+        getMyProfile,
       }}
     >
       {children}

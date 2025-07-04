@@ -16,10 +16,10 @@ function ProfilePage() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  const { myProfile, setUserPosts } = useContext(AuthContext);
+  const { myProfile, setUserPosts, setUserProfile, userProfile } =
+    useContext(AuthContext);
   const { showEditModal } = useContext(ModalContext);
 
-  const [userProfile, setUserProfile] = useState([]);
   const [loading, setLoading] = useState(false);
 
   // Profil username ni ajratib olish (bo'limlarni e'tiborsiz qoldirish)

@@ -19,7 +19,7 @@ function LeftMenu() {
   const Location = useLocation();
 
   const { showLoading, setOpenMenu, openMenu } = useContext(ModalContext);
-  const { userInfo, userLocalData } = useContext(AuthContext);
+  const { userLocalData, userProfile } = useContext(AuthContext);
 
   const [activeButton, setActiveButton] = useState(null);
 
@@ -49,8 +49,10 @@ function LeftMenu() {
       case `/@${userLocalData?.username}`:
         setActiveButton(4);
         break;
+      default:
+        setActiveButton(null);
     }
-  }, [Location.pathname, userInfo]);
+  }, [userProfile, , userLocalData?.username, Location.pathname]);
 
   return (
     <div className="menu__wrap">
@@ -87,7 +89,7 @@ function LeftMenu() {
           <div className="heart hover">
             <Link
               className="center__btns"
-              to="activity"
+              to="/activity"
               onClick={() => handleButtonClick(3)}
             >
               {activeButton === 3 ? <HeartActiveIcon /> : <HeartIcon />}
