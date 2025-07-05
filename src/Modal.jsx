@@ -130,7 +130,14 @@ function ModalComponent() {
                     alt="user-img"
                     style={{ borderRadius: "24px" }}
                   />
-                  <div style={{ flex: 1 }}>
+                  <div
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "4px",
+                    }}
+                  >
                     <p className="username">{myProfile?.username}</p>
                     <textarea
                       className="textarea"

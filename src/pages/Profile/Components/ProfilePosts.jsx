@@ -18,6 +18,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import SwiperCore from "swiper";
 import { FreeMode } from "swiper/modules";
 import "swiper/css/free-mode";
+import { ru } from "date-fns/locale";
 SwiperCore.use([FreeMode]);
 
 function ProfilePosts() {
@@ -45,8 +46,6 @@ function ProfilePosts() {
     setActivePostId(null);
     showDeleteModal(uid);
   };
-
-  // console.log(deleteModal);
 
   const handleInfoModal = (postId) => {
     setActivePostId(activePostId === postId ? null : postId);
@@ -295,6 +294,7 @@ function ProfilePosts() {
                       <div className="post__created-time">
                         {formatDistanceToNow(new Date(item.created_at), {
                           addSuffix: true,
+                          locale: ru,
                         })}
                       </div>
                     </div>
@@ -326,95 +326,6 @@ function ProfilePosts() {
                         borderRadius: "8px",
                       }}
                     >
-                      {/* {(item?.videos?.length > 0 ||
-                        item?.images?.length > 0) && (
-                        <div className="media__wrap">
-                          {item?.videos?.map((i, videoIndex) => {
-                            const key = `${postIndex}-${videoIndex}`;
-                            const refIndex = postIndex * 1000 + videoIndex;
-                            return (
-                              <div
-                                className="video__wrap"
-                                style={{
-                                  width:
-                                    item?.videos?.length === 1 &&
-                                    item?.images?.length === 0
-                                      ? "350px"
-                                      : "260px",
-                                  height:
-                                    item?.videos?.length === 1 &&
-                                    item?.images?.length === 0
-                                      ? "430px"
-                                      : "320px",
-                                  position: "relative",
-                                  flexShrink: 0,
-                                }}
-                              >
-                                <video
-                                  ref={(el) => {
-                                    if (el) videoRefs.current[refIndex] = el;
-                                  }}
-                                  src={`${i.media}`}
-                                  muted={mutedStates[key]}
-                                  loop
-                                  playsInline
-                                  autoPlay
-                                  style={{
-                                    width: "100%",
-                                    height: "100%",
-                                    objectFit: "cover",
-                                    borderRadius: "8px",
-                                  }}
-                                />
-                                <button
-                                  className="volume__muted-btn"
-                                  onClick={() =>
-                                    handleMute(postIndex, videoIndex)
-                                  }
-                                >
-                                  {mutedStates[key] ? (
-                                    <VolumeMutedIcon />
-                                  ) : (
-                                    <VolumeIcon />
-                                  )}
-                                </button>
-                              </div>
-                            );
-                          })}
-
-                          {item?.images?.map((i) => (
-                            <div
-                              className="image__wrap"
-                              style={{
-                                width: `${
-                                  item?.images?.length === 1 &&
-                                  item?.videos?.length === 0
-                                    ? "300px"
-                                    : "320px"
-                                }`,
-                                height: `${
-                                  item?.images?.length === 1 &&
-                                  item?.videos?.length === 0
-                                    ? "320px"
-                                    : "320px"
-                                }`,
-                                flexShrink: 0,
-                              }}
-                            >
-                              <img
-                                src={`${i.media}`}
-                                alt="image"
-                                style={{
-                                  width: "100%",
-                                  height: "100%",
-                                  objectFit: "cover",
-                                  borderRadius: "8px",
-                                }}
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      )} */}
                       <div className="media__wrap" key={item?.uid}>
                         {item?.videos?.map((i, videoIndex) => {
                           if (!i?.media) return null;

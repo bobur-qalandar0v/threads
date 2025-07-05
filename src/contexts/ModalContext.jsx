@@ -48,12 +48,6 @@ export const ModalProvider = ({ children }) => {
     );
   };
 
-  // const handlePostDelete = (uid) => {
-  //   Backend.delete(`/posts/${uid}`).then((res) => {
-  //     console.log(res);
-  //   });
-  // };
-
   const showDeleteModal = (uid) => {
     setDeleteModal({ isOpen: true, uid });
   };

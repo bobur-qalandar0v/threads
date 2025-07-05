@@ -22,6 +22,10 @@ import { formatDistanceToNow } from "date-fns";
 import { Backend } from "../../api";
 import "swiper/css/free-mode";
 import { message } from "antd";
+import { ru } from "date-fns/locale";
+import DeleteIcon from "../../assets/icons/DeleteIcon";
+import StatisticsIcon from "../../assets/icons/StatisticsIcon";
+import DeleteModal from "./DeleteModal";
 SwiperCore.use([FreeMode]);
 
 function DashboardPage() {
@@ -31,17 +35,27 @@ function DashboardPage() {
   const textareaRef = useRef(null);
   const navigate = useNavigate();
 
-  const { showLoading, post, setPost, getPosts, loading } =
-    useContext(ModalContext);
+  const {
+    showLoading,
+    post,
+    setPost,
+    getPosts,
+    loading,
+    showDeleteModal,
+    deleteModal,
+  } = useContext(ModalContext);
   const { addFavorites, favorite } = useContext(FavoriteContext);
-  const { myProfile, accessToken, refreshToken } = useContext(AuthContext);
+  const { myProfile, myPosts, accessToken, refreshToken } =
+    useContext(AuthContext);
 
+  const [commentLoading, setCommentLoading] = useState(false);
+  const [showEditOptions, setShowEditOptions] = useState({});
   const [animatedCounts, setAnimatedCounts] = useState({});
   const [activePostUid, setActivePostUid] = useState(null);
   const [mutedStates, setMutedStates] = useState({});
   const [comment, setComment] = useState(null);
+  const [timeLeft, setTimeLeft] = useState({});
   const [value, setValue] = useState("");
-  const [commentLoading, setCommentLoading] = useState(false);
 
   const isCommentDisabled = value.trim();
 
@@ -63,6 +77,15 @@ function DashboardPage() {
     }
   }, [comment]);
 
+  const isMyPost = (post) => {
+    return post?.author?.username === myProfile?.username;
+  };
+
+  const handleOpenDeleteModal = (uid) => {
+    setActivePostUid(null);
+    showDeleteModal(uid);
+  };
+
   const handleSubmitComment = (uid) => {
     setCommentLoading(true);
     const formData = new FormData();
@@ -77,7 +100,6 @@ function DashboardPage() {
     })
       .then((res) => {
         if (res.status == 201) {
-          // Post ro'yxatini yangilash (comments_count +1)
           setPost((prevPosts) =>
             prevPosts.map((post) =>
               post.uid === uid
@@ -87,7 +109,6 @@ function DashboardPage() {
           );
           setValue("");
           setComment(null);
-          // message.success("Publication announced");
           message.success("Nashr qilindi");
         }
       })
@@ -183,7 +204,7 @@ function DashboardPage() {
         dashboardMainRef.current.removeEventListener("scroll", handleScroll);
       }
     };
-  }, []);
+  }, [myPosts, post]);
 
   useEffect(() => {
     const newStates = {};
@@ -228,9 +249,103 @@ function DashboardPage() {
     }
   }, [value]);
 
+  // Vaqtni hisoblash va edit imkoniyatini yangilash
+  const updateTimers = () => {
+    const newTimeLeft = {};
+    const newShowEditOptions = {};
+
+    myPosts?.forEach((post) => {
+      if (post.created_at) {
+        const postDate = new Date(post.created_at);
+        const now = new Date();
+        const diffMs = now - postDate;
+        const diffMins = Math.floor(diffMs / (1000 * 60));
+
+        // 15 daqiqadan kam vaqt qolganligini hisoblash
+        const minsLeft = Math.max(0, 15 - diffMins);
+        const secsLeft =
+          minsLeft > 0 ? 59 - Math.floor((diffMs / 1000) % 60) : 0;
+
+        newTimeLeft[post.uid] = {
+          mins: minsLeft,
+          secs: secsLeft,
+        };
+
+        // 15 daqiqadan o'tmagan postlar uchun edit imkoniyati
+        newShowEditOptions[post.uid] = diffMins < 15;
+      }
+    });
+
+    setTimeLeft(newTimeLeft);
+    setShowEditOptions(newShowEditOptions);
+  };
+
+  useEffect(() => {
+    updateTimers();
+    const timerInterval = setInterval(updateTimers, 1000);
+    return () => clearInterval(timerInterval);
+  }, [myPosts]);
+
   useEffect(() => {
     getPosts();
   }, []);
+
+  const renderPostMenu = (post) => {
+    const canEdit = showEditOptions[post.uid] ?? false;
+    const timeRemaining = timeLeft[post.uid] || { mins: 0, secs: 0 };
+
+    return (
+      <ul className="post__menu-list" ref={menuRef}>
+        <div className="post__menu-list-wrap statistic">
+          <li className="this__other">
+            <span>Статистика</span>
+            <StatisticsIcon />
+          </li>
+        </div>
+        {canEdit ? <div className="line"></div> : null}
+
+        {canEdit && (
+          <>
+            <div className="post__menu-list-wrap edit">
+              <li className="this__other">
+                <span>Редактировать</span>
+                <span className="edit-timer">
+                  {timeRemaining.mins}:{timeRemaining.secs < 10 ? "0" : ""}
+                  {timeRemaining.secs}
+                </span>
+              </li>
+            </div>
+          </>
+        )}
+
+        <div className="post__menu-list-wrap save">
+          <li className="this__other">
+            <span>Сохранить</span>
+            <SaveIcon />
+          </li>
+        </div>
+        <div className="line"></div>
+
+        <div className="post__menu-list-wrap delete">
+          <li
+            className="delete__btn"
+            onClick={() => handleOpenDeleteModal(post.uid)}
+          >
+            <span>Удалить</span>
+            <DeleteIcon />
+          </li>
+        </div>
+        <div className="line"></div>
+
+        <div className="post__menu-list-wrap copy">
+          <li className="this__other">
+            <span>Копировать ссылку</span>
+            <LinkCopyIcon />
+          </li>
+        </div>
+      </ul>
+    );
+  };
 
   return loading ? (
     <div className="loader__wrap">
@@ -311,6 +426,7 @@ function DashboardPage() {
                         <div style={{ color: "#717171", fontSize: "14px" }}>
                           {formatDistanceToNow(new Date(item.created_at), {
                             addSuffix: true,
+                            locale: ru,
                           })}
                         </div>
                       </div>
@@ -325,42 +441,45 @@ function DashboardPage() {
                     </div>
                     {activePostUid === item?.uid && (
                       <div className="post__menu-modal" ref={menuRef}>
-                        <ul className="post__menu-list">
-                          <li className="this__other">
-                            <span>Сохранить</span>
-                            <SaveIcon />
-                          </li>
-                          <li
-                            className="this__other"
-                            style={{ marginBottom: "8px" }}
-                          >
-                            <span>Не интересует</span>
-                            <NotInterestingIcon />
-                          </li>
-                          <span className="line"></span>
-                          <li className="other">
-                            <span>Заблокировать</span>
-                            <BlokIcon />
-                          </li>
-                          <li className="shikoyat">
-                            <span>Пожаловаться</span>
-                            <ComplainIcon />
-                          </li>
-                          <span className="line"></span>
-                          <li
-                            className="this__other"
-                            style={{ marginTop: "16px" }}
-                          >
-                            <span>Копировать ссылку</span>
-                            <LinkCopyIcon />
-                          </li>
-                        </ul>
+                        {isMyPost(item) ? (
+                          renderPostMenu(item)
+                        ) : (
+                          <ul className="post__menu-list">
+                            <li className="this__other">
+                              <span>Сохранить</span>
+                              <SaveIcon />
+                            </li>
+                            <li
+                              className="this__other"
+                              style={{ marginBottom: "8px" }}
+                            >
+                              <span>Не интересует</span>
+                              <NotInterestingIcon />
+                            </li>
+                            <span className="line"></span>
+                            <li className="other">
+                              <span>Заблокировать</span>
+                              <BlokIcon />
+                            </li>
+                            <li className="shikoyat">
+                              <span>Пожаловаться</span>
+                              <ComplainIcon />
+                            </li>
+                            <span className="line"></span>
+                            <li
+                              className="this__other"
+                              style={{ marginTop: "16px" }}
+                            >
+                              <span>Копировать ссылку</span>
+                              <LinkCopyIcon />
+                            </li>
+                          </ul>
+                        )}
                       </div>
                     )}
                     {item?.content && (
                       <p className="post__text">{item?.content}</p>
                     )}
-
                     {(item?.videos?.length > 0 || item?.images?.length > 0) && (
                       <Swiper
                         spaceBetween={6}
@@ -463,7 +582,6 @@ function DashboardPage() {
                         </SwiperSlide>
                       </Swiper>
                     )}
-
                     <div className="actions">
                       <div className="actions__wrap">
                         <div className="heart__action">
@@ -592,6 +710,7 @@ function DashboardPage() {
             </div>
           );
         })}
+        {deleteModal.isOpen ? <DeleteModal uid={deleteModal.uid} /> : <></>}
       </div>
     </div>
   );
