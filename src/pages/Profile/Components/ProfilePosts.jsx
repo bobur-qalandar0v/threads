@@ -42,6 +42,9 @@ function ProfilePosts() {
     showLoading();
   };
 
+  // console.log(userProfile)
+  // console.log(myProfile)
+
   const handleOpenDeleteModal = (uid) => {
     setActivePostId(null);
     showDeleteModal(uid);
@@ -252,7 +255,7 @@ function ProfilePosts() {
         <img
           width={80}
           height={50}
-          style={{ borderRadius: "24px" }}
+          style={{ borderRadius: "50%", objectFit: "cover" }}
           src={
             myProfile?.photo === null
               ? "https://www.instagram.com/static/images/text_app/profile_picture/profile_pic.png/72f3228a91ee.png"
@@ -278,7 +281,7 @@ function ProfilePosts() {
                   <img
                     width={40}
                     height={40}
-                    style={{ borderRadius: "24px" }}
+                    style={{ borderRadius: "50%", objectFit: "cover" }}
                     src={
                       myProfile?.photo === null
                         ? "https://www.instagram.com/static/images/text_app/profile_picture/profile_pic.png/72f3228a91ee.png"
@@ -530,95 +533,6 @@ function ProfilePosts() {
                           borderRadius: "8px",
                         }}
                       >
-                        {/* {(item?.videos?.length > 0 ||
-                          item?.images?.length > 0) && (
-                          <div className="media__wrap">
-                            {item?.videos?.map((i, videoIndex) => {
-                              const key = `${postIndex}-${videoIndex}`;
-                              const refIndex = postIndex * 1000 + videoIndex;
-                              return (
-                                <div
-                                  className="video__wrap"
-                                  style={{
-                                    width:
-                                      item?.videos?.length === 1 &&
-                                      item?.images?.length === 0
-                                        ? "350px"
-                                        : "260px",
-                                    height:
-                                      item?.videos?.length === 1 &&
-                                      item?.images?.length === 0
-                                        ? "430px"
-                                        : "320px",
-                                    position: "relative",
-                                    flexShrink: 0,
-                                  }}
-                                >
-                                  <video
-                                    ref={(el) => {
-                                      if (el) videoRefs.current[refIndex] = el;
-                                    }}
-                                    src={`${i.media}`}
-                                    muted={mutedStates[key]}
-                                    loop
-                                    playsInline
-                                    autoPlay
-                                    style={{
-                                      width: "100%",
-                                      height: "100%",
-                                      objectFit: "cover",
-                                      borderRadius: "8px",
-                                    }}
-                                  />
-                                  <button
-                                    className="volume__muted-btn"
-                                    onClick={() =>
-                                      handleMute(postIndex, videoIndex)
-                                    }
-                                  >
-                                    {mutedStates[key] ? (
-                                      <VolumeMutedIcon />
-                                    ) : (
-                                      <VolumeIcon />
-                                    )}
-                                  </button>
-                                </div>
-                              );
-                            })}
-
-                            {item?.images?.map((i) => (
-                              <div
-                                className="image__wrap"
-                                style={{
-                                  width: `${
-                                    item?.images?.length === 1 &&
-                                    item?.videos?.length === 0
-                                      ? "300px"
-                                      : "320px"
-                                  }`,
-                                  height: `${
-                                    item?.images?.length === 1 &&
-                                    item?.videos?.length === 0
-                                      ? "320px"
-                                      : "320px"
-                                  }`,
-                                  flexShrink: 0,
-                                }}
-                              >
-                                <img
-                                  src={`${i.media}`}
-                                  alt="image"
-                                  style={{
-                                    width: "100%",
-                                    height: "100%",
-                                    objectFit: "cover",
-                                    borderRadius: "8px",
-                                  }}
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        )} */}
                         <div className="media__wrap" key={item?.uid}>
                           {item?.videos?.map((i, videoIndex) => {
                             if (!i?.media) return null;

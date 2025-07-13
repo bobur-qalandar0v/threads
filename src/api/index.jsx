@@ -14,5 +14,3 @@ Backend.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
-
-// 401 BO‘LSA REFRESH TOKEN ORQALI YANGILASH

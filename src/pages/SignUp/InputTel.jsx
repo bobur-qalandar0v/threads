@@ -45,7 +45,7 @@ function InputTel({ value = "", onChange }) {
       className="input-field"
       onChange={handleChange}
       value={value}
-      placeholder="+998(99)999-99-99"
+      placeholder="+998(__)___-__-__"
     />
   );
 }

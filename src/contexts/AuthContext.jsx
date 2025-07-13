@@ -1,6 +1,5 @@
 import { createContext, useEffect, useState } from "react";
 import { Backend } from "../api";
-import { useNavigate } from "react-router-dom";
 
 export const AuthContext = createContext(null);
 
@@ -17,6 +16,11 @@ export const AuthProvider = ({ children }) => {
     ? JSON.parse(localStorage.getItem("UserData"))
     : {};
 
+  let DarkMode = localStorage.getItem("dark-mode")
+    ? JSON.parse(localStorage.getItem("dark-mode"))
+    : true;
+
+  const [darkMode, setDarkMode] = useState(DarkMode);
   const [loading, setLoading] = useState(false);
   const [refreshToken, setRefreshToken] = useState(localRefreshToken);
   const [accessToken, setAccessToken] = useState(localAccessToken);
@@ -83,6 +87,7 @@ export const AuthProvider = ({ children }) => {
         } catch (refreshErr) {
           localStorage.removeItem("access_token");
           localStorage.removeItem("refresh_token");
+          localStorage.removeItem("UserData");
           window.location.href = "/login"; // refresh ham yaroqsiz bo‘lsa
           return Promise.reject(refreshErr);
         }
@@ -108,6 +113,8 @@ export const AuthProvider = ({ children }) => {
         myProfile,
         userPosts,
         myPosts,
+        darkMode,
+        setDarkMode,
         setIsAuth,
         setMyPosts,
         setUserToken,

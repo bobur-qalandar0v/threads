@@ -10,6 +10,7 @@ export const ModalProvider = ({ children }) => {
   const mainRef = useRef(null);
 
   const [openModal, setOpenModal] = useState(false);
+  const [openWarning, setOpenWarning] = useState(false);
   const [deleteModal, setDeleteModal] = useState({
     isOpen: false,
     postUid: null,
@@ -17,9 +18,11 @@ export const ModalProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [editModal, setEditModal] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
-
+  const [followModal, setFollowModal] = useState(false);
+  const [follow, setFollow] = useState(null);
+  const [following, setFollowing] = useState([]);
+  const [followers, setFollowers] = useState([]);
   const [post, setPost] = useState([]);
-
   const [muted, setMuted] = useState(true);
 
   const getPosts = () => {
@@ -76,26 +79,36 @@ export const ModalProvider = ({ children }) => {
   return (
     <ModalContext.Provider
       value={{
-        showLoading,
-        handleCancel,
         openModal,
-        setOpenModal,
         loading,
-        getPosts,
-        setPost,
         post,
         muted,
-        setMuted,
         editModal,
-        setEditModal,
-        showEditModal,
-        openMenu,
-        setOpenMenu,
-        openMenuRef,
+        deleteModal,
         mainRef,
+        openMenuRef,
+        openMenu,
+        openWarning,
+        followModal,
+        follow,
+        following,
+        followers,
+        setFollowing,
+        setFollowers,
+        setFollow,
+        getPosts,
+        setPost,
+        setMuted,
+        setEditModal,
+        setFollowModal,
+        showEditModal,
+        setOpenMenu,
+        setOpenModal,
+        handleCancel,
         getHandleLike,
         setDeleteModal,
-        deleteModal,
+        setOpenWarning,
+        showLoading,
         showDeleteModal,
       }}
     >

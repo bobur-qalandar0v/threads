@@ -18,8 +18,10 @@ import { AuthContext } from "../contexts/AuthContext";
 function LeftMenu() {
   const Location = useLocation();
 
-  const { showLoading, setOpenMenu, openMenu } = useContext(ModalContext);
-  const { userLocalData, userProfile } = useContext(AuthContext);
+  const { showLoading, setOpenMenu, openMenu, setOpenWarning, openWarning } =
+    useContext(ModalContext);
+  const { userLocalData, userProfile, accessToken, refreshToken } =
+    useContext(AuthContext);
 
   const [activeButton, setActiveButton] = useState(null);
 
@@ -28,6 +30,14 @@ function LeftMenu() {
       setOpenMenu(false);
     } else {
       setOpenMenu(true);
+    }
+  };
+
+  const handleOpenWarning = () => {
+    if (accessToken === "" && refreshToken === "") {
+      setOpenWarning(true);
+    } else {
+      showLoading();
     }
   };
 
@@ -46,19 +56,20 @@ function LeftMenu() {
       case "/activity":
         setActiveButton(3);
         break;
-      case `/@${userLocalData?.username}`:
-        setActiveButton(4);
-        break;
       default:
-        setActiveButton(null);
+        if (Location?.pathname.startsWith(`/@${userLocalData?.username}`)) {
+          setActiveButton(4);
+        } else {
+          setActiveButton(null);
+        }
     }
-  }, [userProfile, , userLocalData?.username, Location.pathname]);
+  }, [userProfile, userLocalData?.username, Location.pathname]);
 
   return (
     <div className="menu__wrap">
       <div className="menu__items">
         <div className="menu__top">
-          <Link to="/" onClick={() => handleButtonClick(1)}>
+          <Link to="/" onClick={() => setActiveButton(1)}>
             <LogoIcon />
           </Link>
         </div>
@@ -67,7 +78,7 @@ function LeftMenu() {
             <Link
               to="/"
               className="center__btns"
-              onClick={() => handleButtonClick(1)}
+              onClick={() => setActiveButton(1)}
             >
               {activeButton === 1 ? <HomeActiveIcon /> : <HomeIcon />}
             </Link>
@@ -76,33 +87,54 @@ function LeftMenu() {
             <Link
               to="/search"
               className="center__btns"
-              onClick={() => handleButtonClick(2)}
+              onClick={() => setActiveButton(2)}
             >
               {activeButton === 2 ? <SearchActiveIcon /> : <SearchIcon />}
             </Link>
           </div>
           <div className="plus__btn-wrap">
-            <button className="center__btns plus__btn" onClick={showLoading}>
+            <button
+              className="center__btns plus__btn"
+              onClick={handleOpenWarning}
+            >
               <PlusIcon className="plus__icon" />
             </button>
           </div>
           <div className="heart hover">
-            <Link
-              className="center__btns"
-              to="/activity"
-              onClick={() => handleButtonClick(3)}
-            >
-              {activeButton === 3 ? <HeartActiveIcon /> : <HeartIcon />}
-            </Link>
+            {accessToken === "" && refreshToken === "" ? (
+              <button
+                className="center__btns"
+                onClick={() => setOpenWarning(true)}
+              >
+                {activeButton === 3 ? <HeartActiveIcon /> : <HeartIcon />}
+              </button>
+            ) : (
+              <Link
+                className="center__btns"
+                to="/activity"
+                onClick={() => handleButtonClick(3)}
+              >
+                {activeButton === 3 ? <HeartActiveIcon /> : <HeartIcon />}
+              </Link>
+            )}
           </div>
           <div className="profile hover">
-            <Link
-              className="center__btns"
-              to={`/@${userLocalData?.username}`}
-              onClick={() => handleButtonClick(4)}
-            >
-              {activeButton === 4 ? <ProfileActiveIcon /> : <ProfileIcon />}
-            </Link>
+            {accessToken === "" && refreshToken === "" ? (
+              <button
+                className="center__btns"
+                onClick={() => setOpenWarning(true)}
+              >
+                {activeButton === 4 ? <ProfileActiveIcon /> : <ProfileIcon />}
+              </button>
+            ) : (
+              <Link
+                className="center__btns"
+                to={`/@${userLocalData?.username}`}
+                onClick={() => handleButtonClick(4)}
+              >
+                {activeButton === 4 ? <ProfileActiveIcon /> : <ProfileIcon />}
+              </Link>
+            )}
           </div>
         </div>
         <div className="menu__bottom">

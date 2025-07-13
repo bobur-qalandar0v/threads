@@ -21,11 +21,14 @@ import EditProfileModal from "./EditProfileModal";
 import { ModalContext } from "./contexts/ModalContext";
 import { Backend } from "./api";
 import { backendurls } from "./constants/urls";
+import WarningModal from "./WarningModal";
+import LightIcon from "./assets/icons/LightIcon";
+import DarkIcon from "./assets/icons/DarkIcon";
+import FollowModal from "./FollowModal";
 
 function App() {
-  const [darkMode, setDarkMode] = useState(false);
-
-  const { refreshToken, accessToken, setAccessToken } = useContext(AuthContext);
+  const { refreshToken, accessToken, setAccessToken, darkMode, setDarkMode } =
+    useContext(AuthContext);
 
   const { openMenu, setOpenMenu, mainRef, openMenuRef } =
     useContext(ModalContext);
@@ -33,11 +36,14 @@ function App() {
   const navigate = useNavigate();
   const Location = useLocation();
 
+  const [loading, setLoading] = useState(false);
+
   const isAuthPage =
     Location.pathname === "/login" || Location.pathname === "/register";
 
-  const toggleTheme = () => {
-    setDarkMode((prevMode) => !prevMode);
+  const handleLightMode = () => {
+    localStorage.setItem("dark-mode", false);
+    setDarkMode();
   };
 
   const handleLogout = async () => {
@@ -45,6 +51,7 @@ function App() {
     formData.append("refresh", refreshToken); // Refresh tokenni form-data sifatida qo'shish
 
     try {
+      setLoading(true);
       await Backend.post(
         backendurls.auth.logout,
         formData, // Form data sifatida yuborish
@@ -57,6 +64,8 @@ function App() {
       );
     } catch (error) {
       console.error("Logout failed:", error);
+    } finally {
+      setLoading(false);
     }
 
     navigate("/login");
@@ -97,20 +106,49 @@ function App() {
       </section>
 
       {openMenu === true ? (
-        <div className="openMenu__wrap" ref={openMenuRef}>
-          <div className="openMenu__item">
-            <button className="btns">Внешний вид</button>
-            <button className="btns">Статистика</button>
-            <button className="btns">Настройки</button>
-            <p className="line"></p>
-            <button className="btns" style={{ marginTop: "9px" }}>
-              Сообщить о проблеме
-            </button>
-            <button className="logout" onClick={handleLogout}>
-              Выйти
-            </button>
+        accessToken === "" && refreshToken === "" ? (
+          <div className="openMenu__wrap little-modal" ref={openMenuRef}>
+            <h2 className="little-modal-title">Внешний вид</h2>
+            <div className="little-modal-btn-wrap">
+              <button
+                className={`light__btn ${darkMode ? "" : "active"}`}
+                onClick={handleLightMode}
+              >
+                <LightIcon />
+              </button>
+              <button className={`dark__btn ${darkMode ? "active" : ""}`}>
+                <DarkIcon />
+              </button>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="openMenu__wrap" ref={openMenuRef}>
+            <div className="openMenu__item">
+              <button className="btns">Внешний вид</button>
+              <button className="btns">Статистика</button>
+              <button className="btns">Настройки</button>
+              <p className="line"></p>
+              <button className="btns" style={{ marginTop: "9px" }}>
+                Сообщить о проблеме
+              </button>
+              <button className="logout" onClick={handleLogout}>
+                {loading ? (
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <div className="loader"></div>
+                  </div>
+                ) : (
+                  <span>Выйти</span>
+                )}
+              </button>
+            </div>
+          </div>
+        )
       ) : null}
 
       <main className="main" ref={mainRef}>
@@ -140,6 +178,8 @@ function App() {
       )}
       <ModalComponent />
       <EditProfileModal />
+      <WarningModal />
+      <FollowModal />
     </div>
   );
 }

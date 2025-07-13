@@ -2,7 +2,6 @@ import ActivityPage from "../pages/Activity/ActivityPage";
 import DashboardPage from "../pages/Dashboard/DashboardPage";
 import ProfilePage from "../pages/Profile/ProfilePage";
 import SearchPage from "../pages/Search/SearchPage";
-import UserProfilePage from "../pages/UserProfile/UserProfilePage";
 
 export const routes = [
   {

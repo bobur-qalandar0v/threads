@@ -16,9 +16,18 @@ function ProfilePage() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  const { myProfile, setUserPosts, setUserProfile, userProfile } =
+  const { myProfile, setUserPosts, setUserProfile, userProfile, accessToken } =
     useContext(AuthContext);
-  const { showEditModal } = useContext(ModalContext);
+  const {
+    showEditModal,
+    setFollowModal,
+    follow,
+    following,
+    followers,
+    setFollow,
+    setFollowing,
+    setFollowers,
+  } = useContext(ModalContext);
 
   const [loading, setLoading] = useState(false);
 
@@ -47,7 +56,58 @@ function ProfilePage() {
     }
   };
 
+  const followClick = async (data) => {
+    try {
+      const response = await Backend.post(`/follow/${data}`, null, {
+        headers: `Bearer ${accessToken}`,
+      });
+
+      if (response.status === 201) {
+        setFollow(false);
+      }
+    } catch (err) {
+      console.error("Xatolik yuz berdi: ", err);
+    }
+
+    getFollowing();
+  };
+
+  const getFollowing = async () => {
+    const response = await Backend.get(`/${username}/following`);
+    const res = await Backend.get(`/${username}/followers`);
+
+    setFollowing(response.data);
+    setFollowers(res.data);
+  };
+
+  console.log(followers);
+  console.log(following);
+
+  const handleOpenFollowModal = () => {
+    setFollowModal(true);
+  };
+
   useEffect(() => {
+    const isFollowers = followers?.followers?.some(
+      (user) => user?.username === myProfile?.username
+    );
+
+    setFollow(isFollowers);
+  }, [followers, userProfile?.username]);
+
+  const isFollowingThem = followers?.followers?.some(
+    (user) => user.username === myProfile?.username
+  );
+
+  const isFollowedByThem = following?.following?.some(
+    (user) => user.username === myProfile?.username
+  );
+
+  // Bu holda: ular meni follow qilishgan, lekin men ularni qilmaganman
+  const shouldFollowBack = isFollowedByThem && !isFollowingThem;
+
+  useEffect(() => {
+    getFollowing();
     getProfile();
   }, [username]);
 
@@ -76,7 +136,7 @@ function ProfilePage() {
                         <img
                           width={90}
                           height={90}
-                          style={{ borderRadius: "50%" }}
+                          style={{ borderRadius: "50%", objectFit: "cover" }}
                           src={
                             myProfile?.photo === null
                               ? "https://www.instagram.com/static/images/text_app/profile_picture/profile_pic.png/72f3228a91ee.png"
@@ -123,7 +183,12 @@ function ProfilePage() {
                               alt="img"
                             />
                           </div>
-                          <span>59 подписчиков</span>
+                          <button
+                            className="follow-count"
+                            onClick={handleOpenFollowModal}
+                          >
+                            <span>59 подписчиков</span>
+                          </button>
                         </div>
                         {myProfile?.link === null ? null : (
                           <div className="user__url-wrap">
@@ -223,7 +288,7 @@ function ProfilePage() {
                         <img
                           width={90}
                           height={90}
-                          style={{ borderRadius: "50%" }}
+                          style={{ borderRadius: "50%", objectFit: "cover" }}
                           src={
                             userProfile?.photo === null
                               ? "https://www.instagram.com/static/images/text_app/profile_picture/profile_pic.png/72f3228a91ee.png"
@@ -295,7 +360,16 @@ function ProfilePage() {
                     </div>
                   </div>
                   <div className="follow__btn-wrap">
-                    <button className="follow-btn">Подписаться</button>
+                    <button
+                      className={`follow-btn ${follow ? "active" : ""}`}
+                      onClick={() => followClick(userProfile?.username)}
+                    >
+                      {follow
+                        ? "Подписки"
+                        : shouldFollowBack
+                        ? "Подписаться в ответ"
+                        : "Подписаться"}
+                    </button>
                     <button className="mention-btn">Упомянуть</button>
                   </div>
                 </div>

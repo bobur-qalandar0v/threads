@@ -177,7 +177,6 @@ function DashboardPage() {
         localStorage.removeItem("UserData");
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
-        navigate("/login");
       }
     });
   }, []);
@@ -290,6 +289,8 @@ function DashboardPage() {
     getPosts();
   }, []);
 
+  // console.log(post)
+
   const renderPostMenu = (post) => {
     const canEdit = showEditOptions[post.uid] ?? false;
     const timeRemaining = timeLeft[post.uid] || { mins: 0, secs: 0 };
@@ -364,7 +365,7 @@ function DashboardPage() {
                 <img
                   width={45}
                   height={45}
-                  style={{ borderRadius: "24px", cursor: "pointer" }}
+                  style={{ borderRadius: "24px", cursor: "pointer", objectFit: "cover" }}
                   src={
                     myProfile?.photo === null
                       ? "https://www.instagram.com/static/images/text_app/profile_picture/profile_pic.png/72f3228a91ee.png"
@@ -394,7 +395,7 @@ function DashboardPage() {
                     <img
                       width={40}
                       height={40}
-                      style={{ borderRadius: "24px" }}
+                      style={{ borderRadius: "24px", objectFit: "cover" }}
                       src={
                         item?.author?.photo === null
                           ? "https://www.instagram.com/static/images/text_app/profile_picture/profile_pic.png/72f3228a91ee.png"

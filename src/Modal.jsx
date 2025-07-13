@@ -12,7 +12,9 @@ import { AuthContext } from "./contexts/AuthContext";
 function ModalComponent() {
   const { openModal, handleCancel, loading, getPosts } =
     useContext(ModalContext);
+
   const { accessToken, myProfile, getMyProfile } = useContext(AuthContext);
+  
   const [value, setValue] = useState("");
   const [isPublishing, setIsPublishing] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -128,7 +130,7 @@ function ModalComponent() {
                         : myProfile?.photo
                     }
                     alt="user-img"
-                    style={{ borderRadius: "24px" }}
+                    style={{ borderRadius: "24px", objectFit: "cover" }}
                   />
                   <div
                     style={{
