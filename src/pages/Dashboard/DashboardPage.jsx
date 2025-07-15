@@ -126,34 +126,38 @@ function DashboardPage() {
   };
 
   const handleFavorite = (data) => {
-    const isLiked = favorite.some((item) => item.uid === data.uid);
-    const updatedLikesCount = isLiked
-      ? Math.max(0, data.likes_count - 1)
-      : data.likes_count + 1;
+    if (accessToken === "" && refreshToken === "") {
+      setOpenWarning(true);
+    } else {
+      const isLiked = favorite.some((item) => item.uid === data.uid);
+      const updatedLikesCount = isLiked
+        ? Math.max(0, data.likes_count - 1)
+        : data.likes_count + 1;
 
-    setAnimatedCounts((prev) => ({
-      ...prev,
-      [data.uid]: {
-        value: updatedLikesCount,
-        animate: true,
-      },
-    }));
-
-    setTimeout(() => {
       setAnimatedCounts((prev) => ({
         ...prev,
         [data.uid]: {
-          ...prev[data.uid],
-          animate: false,
+          value: updatedLikesCount,
+          animate: true,
         },
       }));
-    }, 600);
 
-    // Yangilangan data obyektini yuboramiz
-    const updatedData = { ...data, likes_count: updatedLikesCount };
-    addFavorites(updatedData, isLiked);
-    // Muted state o'zgarishiga ta'sir qilmaslik uchun
-    setMutedStates((prev) => ({ ...prev }));
+      setTimeout(() => {
+        setAnimatedCounts((prev) => ({
+          ...prev,
+          [data.uid]: {
+            ...prev[data.uid],
+            animate: false,
+          },
+        }));
+      }, 600);
+
+      // Yangilangan data obyektini yuboramiz
+      const updatedData = { ...data, likes_count: updatedLikesCount };
+      addFavorites(updatedData, isLiked);
+      // Muted state o'zgarishiga ta'sir qilmaslik uchun
+      setMutedStates((prev) => ({ ...prev }));
+    }
   };
 
   const handleMute = (postIndex, videoIndex) => {
@@ -173,7 +177,7 @@ function DashboardPage() {
         Authorization: `Bearer ${accessToken}`,
       },
     }).catch((err) => {
-      if (err.status === 401) {
+      if (err.status == 401) {
         localStorage.removeItem("UserData");
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
@@ -365,7 +369,11 @@ function DashboardPage() {
                 <img
                   width={45}
                   height={45}
-                  style={{ borderRadius: "24px", cursor: "pointer", objectFit: "cover" }}
+                  style={{
+                    borderRadius: "24px",
+                    cursor: "pointer",
+                    objectFit: "cover",
+                  }}
                   src={
                     myProfile?.photo === null
                       ? "https://www.instagram.com/static/images/text_app/profile_picture/profile_pic.png/72f3228a91ee.png"

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import InsightsIcon from "../../assets/icons/InsigthsIcon";
 import { AuthContext } from "../../contexts/AuthContext";
 import {
@@ -15,9 +15,20 @@ import { Backend } from "../../api";
 function ProfilePage() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const profileMainRef = useRef(null);
+  const videoRefs = useRef([]);
+  const menuRef = useRef(null);
 
-  const { myProfile, setUserPosts, setUserProfile, userProfile, accessToken } =
-    useContext(AuthContext);
+  const {
+    myProfile,
+    setUserPosts,
+    userPosts,
+    setUserProfile,
+    userProfile,
+    accessToken,
+    myPosts,
+  } = useContext(AuthContext);
+
   const {
     showEditModal,
     setFollowModal,
@@ -30,6 +41,7 @@ function ProfilePage() {
   } = useContext(ModalContext);
 
   const [loading, setLoading] = useState(false);
+  const [mutedStates, setMutedStates] = useState(true);
 
   // Profil username ni ajratib olish (bo'limlarni e'tiborsiz qoldirish)
   const getUsernameFromPath = (path) => {
@@ -79,9 +91,6 @@ function ProfilePage() {
     setFollowing(response.data);
     setFollowers(res.data);
   };
-
-  console.log(followers);
-  console.log(following);
 
   const handleOpenFollowModal = () => {
     setFollowModal(true);

@@ -22,6 +22,8 @@ export const ModalProvider = ({ children }) => {
   const [follow, setFollow] = useState(null);
   const [following, setFollowing] = useState([]);
   const [followers, setFollowers] = useState([]);
+  const [logoutModal, setLogOutModal] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
   const [post, setPost] = useState([]);
   const [muted, setMuted] = useState(true);
 
@@ -93,6 +95,10 @@ export const ModalProvider = ({ children }) => {
         follow,
         following,
         followers,
+        logoutModal,
+        logoutLoading,
+        setLogoutLoading,
+        setLogOutModal,
         setFollowing,
         setFollowers,
         setFollow,

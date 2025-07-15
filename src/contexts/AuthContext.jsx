@@ -30,13 +30,12 @@ export const AuthProvider = ({ children }) => {
   const [userPosts, setUserPosts] = useState([]);
   const [userProfile, setUserProfile] = useState([]);
   const [userLocalData, setUserLocalData] = useState(localUserData);
-  const [muted, setMuted] = useState(true);
 
   const setUserToken = (refresh_token, access_token) => {
     localStorage.setItem("refresh_token", refresh_token);
     localStorage.setItem("access_token", access_token);
     setRefreshToken(refresh_token);
-    setAccessToken(refresh_token);
+    setAccessToken(access_token);
   };
 
   const setLocalUserInfo = (data) => {
@@ -74,7 +73,6 @@ export const AuthProvider = ({ children }) => {
           const res = await Backend.post("/auth/token/refresh/", {
             refresh: localStorage.getItem("refresh_token"),
           });
-          console.log(res);
 
           const newAccessToken = res.data?.access;
           localStorage.setItem("access_token", newAccessToken);

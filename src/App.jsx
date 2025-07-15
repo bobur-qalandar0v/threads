@@ -1,11 +1,5 @@
-import React, { useContext, useEffect, useState } from "react";
-import {
-  Link,
-  Route,
-  Routes,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+import React, { useContext, useEffect } from "react";
+import { Link, Route, Routes, useLocation } from "react-router-dom";
 import { routes } from "./constants/routes";
 import LeftMenu from "./Components/LeftMenu";
 import SignIn from "./pages/SignIn";
@@ -19,24 +13,26 @@ import ProfileMedia from "./pages/Profile/Components/ProfileMedia";
 import ProfileReplies from "./pages/Profile/Components/ProfileReples";
 import EditProfileModal from "./EditProfileModal";
 import { ModalContext } from "./contexts/ModalContext";
-import { Backend } from "./api";
-import { backendurls } from "./constants/urls";
 import WarningModal from "./WarningModal";
 import LightIcon from "./assets/icons/LightIcon";
 import DarkIcon from "./assets/icons/DarkIcon";
 import FollowModal from "./FollowModal";
+import LogOutModal from "./LogOutModal";
 
 function App() {
-  const { refreshToken, accessToken, setAccessToken, darkMode, setDarkMode } =
-    useContext(AuthContext);
-
-  const { openMenu, setOpenMenu, mainRef, openMenuRef } =
-    useContext(ModalContext);
-
-  const navigate = useNavigate();
   const Location = useLocation();
 
-  const [loading, setLoading] = useState(false);
+  const { refreshToken, accessToken, darkMode, setDarkMode } =
+    useContext(AuthContext);
+
+  const {
+    openMenu,
+    setOpenMenu,
+    mainRef,
+    openMenuRef,
+    logoutLoading,
+    setLogOutModal,
+  } = useContext(ModalContext);
 
   const isAuthPage =
     Location.pathname === "/login" || Location.pathname === "/register";
@@ -46,35 +42,40 @@ function App() {
     setDarkMode();
   };
 
-  const handleLogout = async () => {
-    const formData = new FormData();
-    formData.append("refresh", refreshToken); // Refresh tokenni form-data sifatida qo'shish
-
-    try {
-      setLoading(true);
-      await Backend.post(
-        backendurls.auth.logout,
-        formData, // Form data sifatida yuborish
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`, // Bearer token headerda
-            "Content-Type": "multipart/form-data", // Form-data uchun header
-          },
-        }
-      );
-    } catch (error) {
-      console.error("Logout failed:", error);
-    } finally {
-      setLoading(false);
-    }
-
-    navigate("/login");
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("UserData");
-    setAccessToken("");
+  const handleLogoutModal = () => {
+    setLogOutModal(true);
     setOpenMenu(false);
   };
+
+  // const handleLogout = async () => {
+  //   const formData = new FormData();
+  //   formData.append("refresh", refreshToken); // Refresh tokenni form-data sifatida qo'shish
+
+  //   try {
+  //     setLoading(true);
+  //     await Backend.post(
+  //       backendurls.auth.logout,
+  //       formData, // Form data sifatida yuborish
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${accessToken}`, // Bearer token headerda
+  //           "Content-Type": "multipart/form-data", // Form-data uchun header
+  //         },
+  //       }
+  //     );
+  //   } catch (error) {
+  //     console.error("Logout failed:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+
+  //   navigate("/login");
+  //   localStorage.removeItem("access_token");
+  //   localStorage.removeItem("refresh_token");
+  //   localStorage.removeItem("UserData");
+  //   setAccessToken("");
+  //   setOpenMenu(false);
+  // };
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -131,20 +132,8 @@ function App() {
               <button className="btns" style={{ marginTop: "9px" }}>
                 Сообщить о проблеме
               </button>
-              <button className="logout" onClick={handleLogout}>
-                {loading ? (
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      width: "100%",
-                    }}
-                  >
-                    <div className="loader"></div>
-                  </div>
-                ) : (
-                  <span>Выйти</span>
-                )}
+              <button className="logout__btn" onClick={handleLogoutModal}>
+                <span>Выйти</span>
               </button>
             </div>
           </div>
@@ -176,10 +165,19 @@ function App() {
           </Link>
         </div>
       )}
+      {logoutLoading ? (
+        <div className="loading-wrap">
+          <div className="loading-content">
+            <div className="loading-animate"></div>
+            <div className="loading-text">Loading...</div>
+          </div>
+        </div>
+      ) : null}
       <ModalComponent />
       <EditProfileModal />
       <WarningModal />
       <FollowModal />
+      <LogOutModal />
     </div>
   );
 }

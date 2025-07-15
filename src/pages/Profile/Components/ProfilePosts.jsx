@@ -28,8 +28,15 @@ function ProfilePosts() {
 
   const { showLoading, showDeleteModal, deleteModal } =
     useContext(ModalContext);
-  const { myProfile, myPosts, userProfile, userPosts, loading } =
-    useContext(AuthContext);
+  const {
+    myProfile,
+    myPosts,
+    userProfile,
+    userPosts,
+    loading,
+    accessToken,
+    refreshToken,
+  } = useContext(AuthContext);
   const { addFavorites, favorite } = useContext(FavoriteContext);
 
   const [showEditOptions, setShowEditOptions] = useState({});
@@ -42,9 +49,6 @@ function ProfilePosts() {
     showLoading();
   };
 
-  // console.log(userProfile)
-  // console.log(myProfile)
-
   const handleOpenDeleteModal = (uid) => {
     setActivePostId(null);
     showDeleteModal(uid);
@@ -55,6 +59,10 @@ function ProfilePosts() {
   };
 
   const handleFavorite = (post) => {
+    if (accessToken === "" && refreshToken === "") {
+      setOpenWarning(true);
+    }
+    console.log(post);
     const isLiked = favorite.some((item) => item.uid === post.uid);
     const updatedLikesCount = isLiked
       ? post.likes_count - 1
@@ -177,14 +185,17 @@ function ProfilePosts() {
 
   useEffect(() => {
     const newStates = {};
-    myPosts?.forEach((pItem, pIndex) => {
+
+    const allPosts = myPosts?.length ? myPosts : userPosts;
+
+    allPosts?.forEach((pItem, pIndex) => {
       pItem?.videos?.forEach((_, vIndex) => {
         const key = `${pIndex}-${vIndex}`;
         newStates[key] = true;
       });
     });
     setMutedStates(newStates);
-  }, [myPosts]);
+  }, [myPosts, userPosts]);
 
   const renderPostMenu = (post) => {
     const canEdit = showEditOptions[post.uid] ?? false;
@@ -253,7 +264,7 @@ function ProfilePosts() {
     <div className="posts" ref={profileMainRef}>
       <div className="posts__publish">
         <img
-          width={80}
+          width={50}
           height={50}
           style={{ borderRadius: "50%", objectFit: "cover" }}
           src={

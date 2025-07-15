@@ -63,7 +63,6 @@ function SignUp() {
           setLocalUserInfo(res.data?.user);
           navigate("/");
           message.success(res.data?.message);
-          // window.location.reload();
         }
       })
       .catch((err) => {
