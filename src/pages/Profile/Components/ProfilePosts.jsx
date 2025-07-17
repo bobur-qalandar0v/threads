@@ -514,6 +514,7 @@ function ProfilePosts() {
                         <div className="post__created-time">
                           {formatDistanceToNow(new Date(item.created_at), {
                             addSuffix: true,
+                            locale: ru,
                           })}
                         </div>
                       </div>

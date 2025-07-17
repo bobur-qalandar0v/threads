@@ -43,6 +43,7 @@ function DashboardPage() {
     loading,
     showDeleteModal,
     deleteModal,
+    setOpenWarning,
   } = useContext(ModalContext);
   const { addFavorites, favorite } = useContext(FavoriteContext);
   const { myProfile, myPosts, accessToken, refreshToken } =
@@ -60,14 +61,18 @@ function DashboardPage() {
   const isCommentDisabled = value.trim();
 
   const handleCommentOpen = (data) => {
-    setValue("");
-    if (comment?.uid === undefined) {
-      setComment(data);
-    } else if (comment?.uid === data?.uid) {
-      setComment(null);
-    } else if (comment?.uid !== data?.uid) {
-      setComment(data);
+    if (accessToken === "" && refreshToken === "") {
+      setOpenWarning(true);
+    } else {
       setValue("");
+      if (comment?.uid === undefined) {
+        setComment(data);
+      } else if (comment?.uid === data?.uid) {
+        setComment(null);
+      } else if (comment?.uid !== data?.uid) {
+        setComment(data);
+        setValue("");
+      }
     }
   };
 
@@ -170,6 +175,18 @@ function DashboardPage() {
 
     setMutedStates(updatedStates);
   };
+
+  // useEffect(() => {
+  //   Backend.post("/auth/token/refresh/", {
+  //     refresh: refreshToken,
+  //   }).catch((err) => {
+  //     if (err.status == 401) {
+  //       localStorage.removeItem("UserData");
+  //       localStorage.removeItem("access_token");
+  //       localStorage.removeItem("refresh_token");
+  //     }
+  //   });
+  // }, []);
 
   useEffect(() => {
     Backend.get("/auth/check/", {

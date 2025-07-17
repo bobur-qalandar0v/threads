@@ -26,6 +26,7 @@ function ProfilePage() {
     setUserProfile,
     userProfile,
     accessToken,
+    refreshToken,
     myPosts,
   } = useContext(AuthContext);
 
@@ -38,6 +39,7 @@ function ProfilePage() {
     setFollow,
     setFollowing,
     setFollowers,
+    setOpenWarning
   } = useContext(ModalContext);
 
   const [loading, setLoading] = useState(false);
@@ -69,19 +71,22 @@ function ProfilePage() {
   };
 
   const followClick = async (data) => {
-    try {
-      const response = await Backend.post(`/follow/${data}`, null, {
-        headers: `Bearer ${accessToken}`,
-      });
+    if (accessToken === "" && refreshToken === "") {
+      setOpenWarning(true);
+    } else {
+      try {
+        const response = await Backend.post(`/follow/${data}`, null, {
+          headers: `Bearer ${accessToken}`,
+        });
 
-      if (response.status === 201) {
-        setFollow(false);
+        if (response.status === 201) {
+          setFollow(false);
+        }
+      } catch (err) {
+        console.error("Xatolik yuz berdi: ", err);
       }
-    } catch (err) {
-      console.error("Xatolik yuz berdi: ", err);
+      getFollowing();
     }
-
-    getFollowing();
   };
 
   const getFollowing = async () => {
