@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem("UserData");
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
-        window.location.href = "/login";
+        // window.location.href = "/login";
       }
     });
   }, []);
