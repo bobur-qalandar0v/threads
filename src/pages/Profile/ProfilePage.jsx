@@ -125,6 +125,8 @@ function ProfilePage() {
     getProfile();
   }, [username]);
 
+  console.log(userProfile)
+
   return (
     <div className="profile">
       {userProfile?.is_owner === true ? (

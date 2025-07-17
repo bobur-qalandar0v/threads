@@ -44,7 +44,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   const getMyProfile = async () => {
-    if (accessToken && refreshToken) {
+    if (
+      accessToken !== "" &&
+      refreshToken !== "" &&
+      userLocalData?.username !== ""
+    ) {
       try {
         setLoading(true);
         const res = await Backend.get(`/${userLocalData?.username}`);
@@ -58,42 +62,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  Backend.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-      const originalRequest = error.config;
-      if (
-        error.response?.status === 401 &&
-        !originalRequest._retry &&
-        localStorage.getItem("refresh_token")
-      ) {
-        originalRequest._retry = true;
-
-        try {
-          const res = await Backend.post("/auth/token/refresh/", {
-            refresh: localStorage.getItem("refresh_token"),
-          });
-
-          const newAccessToken = res.data?.access;
-          localStorage.setItem("access_token", newAccessToken);
-
-          // Yangilangan token bilan headerni qo‘shish
-          originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
-
-          // So‘rovni qayta yuborish
-          return Backend(originalRequest);
-        } catch (refreshErr) {
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("refresh_token");
-          localStorage.removeItem("UserData");
-          window.location.href = "/login"; // refresh ham yaroqsiz bo‘lsa
-          return Promise.reject(refreshErr);
-        }
-      }
-
-      return Promise.reject(error);
-    }
-  );
+  // useEffect(() => {
+  //   Backend.get("/auth/check/", {
+  //     headers: {
+  //       Authorization: `Bearer ${accessToken}`,
+  //     },
+  //   }).catch((err) => {
+  //     if (err.status == 401) {
+  //       localStorage.removeItem("UserData");
+  //       localStorage.removeItem("access_token");
+  //       localStorage.removeItem("refresh_token");
+  //       window.location.href = "/login";
+  //     }
+  //   });
+  // }, []);
 
   useEffect(() => {
     getMyProfile();

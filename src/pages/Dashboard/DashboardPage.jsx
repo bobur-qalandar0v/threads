@@ -177,30 +177,19 @@ function DashboardPage() {
   };
 
   // useEffect(() => {
-  //   Backend.post("/auth/token/refresh/", {
-  //     refresh: refreshToken,
+  //   Backend.get("/auth/check/", {
+  //     headers: {
+  //       Authorization: `Bearer ${accessToken}`,
+  //     },
   //   }).catch((err) => {
   //     if (err.status == 401) {
   //       localStorage.removeItem("UserData");
   //       localStorage.removeItem("access_token");
   //       localStorage.removeItem("refresh_token");
+  //       window.location.href = "/login";
   //     }
   //   });
   // }, []);
-
-  useEffect(() => {
-    Backend.get("/auth/check/", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }).catch((err) => {
-      if (err.status == 401) {
-        localStorage.removeItem("UserData");
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-      }
-    });
-  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
