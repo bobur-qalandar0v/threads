@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const Backend = axios.create({
-  baseURL: "https://threadsapi-vd30.onrender.com",
+  baseURL: "https://feruzbek.alwaysdata.net",
 });
 
 // Backend.interceptors.request.use(

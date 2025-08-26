@@ -12,10 +12,9 @@ export function FavoriteProvider({ children }) {
     : [];
 
   const [favorite, setFavorite] = useState(localeInitial);
-  const { getPosts, setPost, getMyPosts, getHandleLike } =
-    useContext(ModalContext);
+  const { setPost } = useContext(ModalContext);
 
-  const { access_token, setMyPosts } = useContext(AuthContext);
+  const { accessToken, setMyPosts } = useContext(AuthContext);
 
   function setLocalFavorite(data) {
     localStorage.setItem("favorite", JSON.stringify(data));
@@ -38,14 +37,13 @@ export function FavoriteProvider({ children }) {
       },
       {
         headers: {
-          Authorization: `Bearer ${access_token}`,
+          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "multipart/form-data",
         },
       }
     )
       .then((res) => {
         if (res.status === 201 || res.status === 204) {
-          // Post ro‘yxatini yangilash
           setPost((prevPosts) =>
             prevPosts.map((post) =>
               post.uid === updatedData.uid

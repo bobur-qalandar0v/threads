@@ -39,7 +39,12 @@ function App() {
 
   const handleLightMode = () => {
     localStorage.setItem("dark-mode", false);
-    setDarkMode();
+    setDarkMode(false);
+  };
+
+  const handleDarkMode = () => {
+    localStorage.setItem("dark-mode", true);
+    setDarkMode(true);
   };
 
   const handleLogoutModal = () => {
@@ -117,7 +122,10 @@ function App() {
               >
                 <LightIcon />
               </button>
-              <button className={`dark__btn ${darkMode ? "active" : ""}`}>
+              <button
+                className={`dark__btn ${darkMode ? "active" : ""}`}
+                onClick={handleDarkMode}
+              >
                 <DarkIcon />
               </button>
             </div>
@@ -147,7 +155,7 @@ function App() {
           ))}
 
           {/* ProfilePage */}
-          <Route path="/:username" element={<ProfilePage />}>
+          <Route path="/:username/" element={<ProfilePage />}>
             <Route index element={<ProfilePosts />} /> {/* VETKA */}
             <Route path="reposts" element={<ProfileReposts />} />
             <Route path="replies" element={<ProfileReplies />} />

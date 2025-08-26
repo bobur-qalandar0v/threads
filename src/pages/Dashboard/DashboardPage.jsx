@@ -176,21 +176,6 @@ function DashboardPage() {
     setMutedStates(updatedStates);
   };
 
-  // useEffect(() => {
-  //   Backend.get("/auth/check/", {
-  //     headers: {
-  //       Authorization: `Bearer ${accessToken}`,
-  //     },
-  //   }).catch((err) => {
-  //     if (err.status == 401) {
-  //       localStorage.removeItem("UserData");
-  //       localStorage.removeItem("access_token");
-  //       localStorage.removeItem("refresh_token");
-  //       window.location.href = "/login";
-  //     }
-  //   });
-  // }, []);
-
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {

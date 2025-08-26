@@ -58,35 +58,64 @@ function ProfilePosts() {
     setActivePostId(activePostId === postId ? null : postId);
   };
 
-  const handleFavorite = (post) => {
+  const handleFavorite = (data) => {
     if (accessToken === "" && refreshToken === "") {
       setOpenWarning(true);
-    }
-    console.log(post);
-    const isLiked = favorite.some((item) => item.uid === post.uid);
-    const updatedLikesCount = isLiked
-      ? post.likes_count - 1
-      : post.likes_count + 1;
+    } else {
+      // const isLiked = favorite.some((item) => item.uid === post.uid);
+      // const updatedLikesCount = isLiked
+      //   ? post.likes_count - 1
+      //   : post.likes_count + 1;
 
-    setAnimatedCounts((prev) => ({
-      ...prev,
-      [post.uid]: {
-        value: updatedLikesCount,
-        animate: true,
-      },
-    }));
+      // setAnimatedCounts((prev) => ({
+      //   ...prev,
+      //   [post.uid]: {
+      //     value: updatedLikesCount,
+      //     animate: true,
+      //   },
+      // }));
 
-    setTimeout(() => {
+      // setTimeout(() => {
+      //   setAnimatedCounts((prev) => ({
+      //     ...prev,
+      //     [post.uid]: {
+      //       ...prev[post.uid],
+      //       animate: false,
+      //     },
+      //   }));
+      // }, 600);
+
+      // addFavorites({ ...post, likes_count: updatedLikesCount }, isLiked);
+
+      const isLiked = favorite.some((item) => item.uid === data.uid);
+      const updatedLikesCount = isLiked
+        ? Math.max(0, data.likes_count - 1)
+        : data.likes_count + 1;
+
       setAnimatedCounts((prev) => ({
         ...prev,
-        [post.uid]: {
-          ...prev[post.uid],
-          animate: false,
+        [data.uid]: {
+          value: updatedLikesCount,
+          animate: true,
         },
       }));
-    }, 600);
 
-    addFavorites({ ...post, likes_count: updatedLikesCount }, isLiked);
+      setTimeout(() => {
+        setAnimatedCounts((prev) => ({
+          ...prev,
+          [data.uid]: {
+            ...prev[data.uid],
+            animate: false,
+          },
+        }));
+      }, 600);
+
+      // Yangilangan data obyektini yuboramiz
+      const updatedData = { ...data, likes_count: updatedLikesCount };
+      addFavorites(updatedData, isLiked);
+      // Muted state o'zgarishiga ta'sir qilmaslik uchun
+      setMutedStates((prev) => ({ ...prev }));
+    }
   };
 
   const handleMute = (postIndex, videoIndex) => {
@@ -263,17 +292,22 @@ function ProfilePosts() {
   ) : userProfile?.is_owner === true ? (
     <div className="posts" ref={profileMainRef}>
       <div className="posts__publish">
-        <img
-          width={50}
-          height={50}
-          style={{ borderRadius: "50%", objectFit: "cover" }}
-          src={
-            myProfile?.photo === null
-              ? "https://www.instagram.com/static/images/text_app/profile_picture/profile_pic.png/72f3228a91ee.png"
-              : myProfile?.photo
-          }
-          alt="profile-img"
-        />
+        <div className="img-wrap">
+          <img
+            style={{
+              borderRadius: "50%",
+              objectFit: "cover",
+              width: "100%",
+              height: "100%",
+            }}
+            src={
+              myProfile?.photo === null
+                ? "https://www.instagram.com/static/images/text_app/profile_picture/profile_pic.png/72f3228a91ee.png"
+                : myProfile?.photo
+            }
+            alt="profile-img"
+          />
+        </div>
         <p className="posts__p" onClick={openModal}>
           Что нового?
         </p>

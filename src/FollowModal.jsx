@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { ModalContext } from "./contexts/ModalContext";
 import { AuthContext } from "./contexts/AuthContext";
+import { Link } from "react-router-dom";
 
 function FollowModal() {
   const followRef = useRef();
@@ -28,6 +29,11 @@ function FollowModal() {
   if (!followModal) {
     return null;
   }
+
+  following.following?.map((item) => {
+    console.log(item?.username);
+  });
+
   return (
     <div className="follow-modal__overlay">
       <div className="follow-modal__wrap">
@@ -67,19 +73,31 @@ function FollowModal() {
               following?.following?.map((item) => (
                 <div className="follow-modal__list">
                   <div className="left-img__wrap">
-                    <img
-                      src={
-                        item?.photo === null
-                          ? "https://www.instagram.com/static/images/text_app/profile_picture/profile_pic.png/72f3228a91ee.png"
-                          : item?.photo
-                      }
-                      alt="img"
-                      className="left__img"
-                    />
+                    <Link
+                      to={`/@${item?.username}`}
+                      onClick={() => setFollowModal()}
+                    >
+                      <img
+                        src={
+                          item?.photo === null
+                            ? "https://www.instagram.com/static/images/text_app/profile_picture/profile_pic.png/72f3228a91ee.png"
+                            : item?.photo
+                        }
+                        alt="img"
+                        className="left__img"
+                      />
+                    </Link>
                   </div>
                   <div className="list-wrap">
                     <div className="list-left">
-                      <h4 className="followers-username">{item.username}</h4>
+                      <Link
+                        to={`@${item?.username}`}
+                        onClick={() => setFollowModal()}
+                        style={{ textDecoration: "none" }}
+                        className="followers-username"
+                      >
+                        {item.username}
+                      </Link>
                       <p className="followers-fullname">{item.fullname}</p>
                     </div>
                     <div className="list-right">

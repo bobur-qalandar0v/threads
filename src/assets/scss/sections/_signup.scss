@@ -176,11 +176,13 @@
     margin-top: 10px;
     padding: 20px 12px;
     border-radius: 8px;
+    font-family: "Lato";
     width: 100%;
-    font-size: 17px;
+    font-size: 18px;
+    font-weight: bold;
     transition: 0.3s ease-in-out;
-    background-color: #444444;
-    color: white;
+    background-color: #fff;
+    color: #000;
     border: none;
 
     &:hover {

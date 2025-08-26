@@ -15,6 +15,7 @@ function InputTel({ value = "", onChange }) {
 
     if (numbers.length > 12) {
       numbers = numbers.slice(0, 12);
+      l;
     }
 
     let formatted = `+${numbers.slice(0, 3)}`;
@@ -43,6 +44,7 @@ function InputTel({ value = "", onChange }) {
   return (
     <Input
       className="input-field"
+      inputMode="tel"
       onChange={handleChange}
       value={value}
       placeholder="+998(__)___-__-__"

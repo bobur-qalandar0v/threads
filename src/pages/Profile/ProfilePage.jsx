@@ -39,7 +39,7 @@ function ProfilePage() {
     setFollow,
     setFollowing,
     setFollowers,
-    setOpenWarning
+    setOpenWarning,
   } = useContext(ModalContext);
 
   const [loading, setLoading] = useState(false);
@@ -60,7 +60,12 @@ function ProfilePage() {
   const getProfile = async () => {
     try {
       setLoading(true);
-      const res = await Backend.get(`${username}`);
+      const res = await Backend.get(`${username}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      console.log(res);
       setUserProfile(res.data);
       setUserPosts(res.data.posts);
     } catch (err) {
@@ -124,8 +129,6 @@ function ProfilePage() {
     getFollowing();
     getProfile();
   }, [username]);
-
-  console.log(userProfile)
 
   return (
     <div className="profile">

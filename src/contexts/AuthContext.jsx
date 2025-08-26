@@ -62,24 +62,58 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // useEffect(() => {
+  //   Backend.get("/auth/check/", {
+  //     headers: {
+  //       Authorization: `Bearer ${accessToken}`,
+  //     },
+  //   }).catch((err) => {
+  //     if (err.status == 401) {
+  //       localStorage.removeItem("UserData");
+  //       localStorage.removeItem("access_token");
+  //       localStorage.removeItem("refresh_token");
+  //       console.log(err);
+  //     }
+  //   });
+  // }, []);
+
   useEffect(() => {
-    Backend.get("/auth/check/", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }).catch((err) => {
-      if (err.status == 401) {
-        localStorage.removeItem("UserData");
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-        // window.location.href = "/login";
-      }
-    });
-  }, []);
+    if (accessToken) {
+      // Faqat accessToken mavjud bo'lganda so'rov yuboramiz
+      Backend.get("/auth/check/", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`, // To'g'ri format: "Bearer <token>"
+        },
+      })
+        .then(() => {
+          setIsAuth(true); // Agar so'rov muvaffaqiyatli bo'lsa, autentifikatsiya tasdiqlanadi
+        })
+        .catch((err) => {
+          if (err.response?.status === 401) {
+            // 401 xatoligini tekshiramiz
+            // Local storagedan tokenlarni o'chiramiz
+            localStorage.removeItem("UserData");
+            localStorage.removeItem("access_token");
+            localStorage.removeItem("refresh_token");
+            // Statelarni tozalaymiz
+            setAccessToken("");
+            setRefreshToken("");
+            setIsAuth(false);
+            setUserLocalData({});
+            console.log(
+              "Avtorizatsiya amalga oshmadi. Tokenlar tozalandi.",
+              err
+            );
+          }
+        });
+    } else {
+      setIsAuth(false); // Agar token bo'lmasa, autentifikatsiya yo'q
+    }
+  }, [accessToken]); // accessToken o'zgarganda qayta ishlaydi
 
   useEffect(() => {
     getMyProfile();
-  }, [userLocalData]);
+  }, [userLocalData, accessToken, refreshToken]);
 
   return (
     <AuthContext.Provider
