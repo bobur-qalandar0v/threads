@@ -96,8 +96,16 @@ function ProfilePage() {
   };
 
   const getFollowing = async () => {
-    const response = await Backend.get(`/${username}/following`);
-    const res = await Backend.get(`/${username}/followers`);
+    const response = await Backend.get(`/${username}/following`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const res = await Backend.get(`/${username}/followers`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
 
     setFollowing(response.data);
     setFollowers(res.data);
