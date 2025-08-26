@@ -51,7 +51,11 @@ export const AuthProvider = ({ children }) => {
     ) {
       try {
         setLoading(true);
-        const res = await Backend.get(`/${userLocalData?.username}`);
+        const res = await Backend.get(`/${userLocalData?.username}`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
         setMyProfile(res.data);
         setMyPosts(res.data.posts);
       } catch (err) {

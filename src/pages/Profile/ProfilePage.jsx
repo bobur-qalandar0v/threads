@@ -101,6 +101,7 @@ function ProfilePage() {
         Authorization: `Bearer ${accessToken}`,
       },
     });
+    
     const res = await Backend.get(`/${username}/followers`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
