@@ -65,7 +65,6 @@ function ProfilePage() {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-      console.log(res);
       setUserProfile(res.data);
       setUserPosts(res.data.posts);
     } catch (err) {
@@ -81,7 +80,9 @@ function ProfilePage() {
     } else {
       try {
         const response = await Backend.post(`/follow/${data}`, null, {
-          headers: `Bearer ${accessToken}`,
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         });
 
         if (response.status === 201) {
