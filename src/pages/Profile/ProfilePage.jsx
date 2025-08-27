@@ -60,11 +60,16 @@ function ProfilePage() {
   const getProfile = async () => {
     try {
       setLoading(true);
-      const res = await Backend.get(`${username}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const res = await Backend.get(
+        `${username}`,
+        accessToken !== ""
+          ? {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
+          : null
+      );
       setUserProfile(res.data);
       setUserPosts(res.data.posts);
     } catch (err) {
@@ -95,18 +100,29 @@ function ProfilePage() {
     }
   };
 
+  console.log(username);
   const getFollowing = async () => {
-    const response = await Backend.get(`/${username}/following`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    
-    const res = await Backend.get(`/${username}/followers`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+    const response = await Backend.get(
+      `/${username}/following`,
+      accessToken !== ""
+        ? {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        : null
+    );
+
+    const res = await Backend.get(
+      `/${username}/followers`,
+      accessToken !== ""
+        ? {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        : null
+    );
 
     setFollowing(response.data);
     setFollowers(res.data);

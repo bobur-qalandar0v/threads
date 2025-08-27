@@ -87,7 +87,7 @@ function EditProfileModal() {
     setSelectedImage([
       {
         file: null,
-        url: "",
+        url: myProfile?.photo,
       },
     ]);
     setChangeImage(false);

@@ -26,7 +26,7 @@ function ProfilePosts() {
   const menuRef = useRef(null);
   const profileMainRef = useRef(null);
 
-  const { showLoading, showDeleteModal, deleteModal } =
+  const { showLoading, showDeleteModal, deleteModal, setOpenWarning } =
     useContext(ModalContext);
   const {
     myProfile,
